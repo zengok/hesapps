@@ -3,10 +3,10 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart' as legacy;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 import '../theme/app_theme.dart';
 import '../providers/app_data_provider.dart';
+import '../providers/usage_provider.dart';
 import '../widgets/glass_card.dart';
 import '../core/localization/app_localizations.dart';
 
@@ -19,15 +19,46 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class _HomeContent extends StatelessWidget {
+// B4: ConsumerWidget — favoritesProvider izleniyor
+class _HomeContent extends ConsumerWidget {
   const _HomeContent();
 
+  // Araç ID → (başlık, ikon, route) haritası
+  static const Map<String, (String, IconData, String)> _toolMeta = {
+    'kdv':              ('KDV',          LucideIcons.percent,     '/calc/kdv'),
+    'maasvergi':        ('Maaş Vergisi', LucideIcons.fileText,    '/maasvergi'),
+    'iskonto':          ('İskonto',      LucideIcons.tags,        '/calc/iskonto'),
+    'karmarji':         ('Kar Marjı',    LucideIcons.trendingUp,  '/calc/karmarji'),
+    'enflasyon':        ('Enflasyon',    LucideIcons.barChart,    '/calc/enflasyon'),
+    'kreditaksit':      ('Kredi Taksit', LucideIcons.home,        '/calc/kreditaksit'),
+    'mevduatgetirisi':  ('Mevduat',      LucideIcons.piggyBank,   '/calc/mevduatgetirisi'),
+    'kredikartiasgari': ('Kredi Kartı',  LucideIcons.creditCard,  '/calc/kredikartiasgari'),
+    'doviz':            ('Döviz',        LucideIcons.dollarSign,  '/calc/doviz'),
+    'bmi':              ('BMI (VKE)',    LucideIcons.activity,    '/calc/bmi'),
+    'idealkilo':        ('İdeal Kilo',   LucideIcons.scale,       '/calc/idealkilo'),
+    'bmr':              ('Kalori (BMR)', LucideIcons.flame,       '/calc/bmr'),
+    'sutuketimi':       ('Su Tüketimi',  LucideIcons.droplet,     '/calc/sutuketimi'),
+    'hamilelik':        ('Hamilelik',    LucideIcons.baby,        '/calc/hamilelik'),
+    'birim':            ('Birim Dön',    LucideIcons.refreshCw,   '/calc/birim'),
+    'sicaklik':         ('Sıcaklık',    LucideIcons.thermometer, '/calc/sicaklik'),
+    'yakit':            ('Yakıt',        LucideIcons.fuel,        '/calc/yakit'),
+    'internet':         ('İnternet Hız', LucideIcons.wifi,        '/calc/internet'),
+    'lgsyks':           ('LGS/YKS',     LucideIcons.calculator,  '/calc/lgsyks'),
+    'gno':              ('GNO',          LucideIcons.bookOpen,    '/calc/gno'),
+    'yas':              ('Yaş',          LucideIcons.calendarDays,'/calc/yas'),
+    'bahsis':           ('Bahşiş',       LucideIcons.coins,       '/calc/bahsis'),
+    'indirimlifiyat':   ('İndirimli Fiyat',LucideIcons.tag,        '/calc/indirimlifiyat'),
+    'tarihfarki':       ('Tarih Farkı',  LucideIcons.calendarClock,'/calc/tarihfarki'),
+  };
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final loc = AppLocalizations.of(context);
     final Color textColor = isDark ? Colors.white : AppTheme.darkNavy;
     final Color subColor = isDark ? Colors.white70 : Colors.black54;
+    // B4: kullanım verisine dayalı favoriler
+    final favorites = ref.watch(favoritesProvider);
     
     return CustomScrollView(
       slivers: [
@@ -53,15 +84,22 @@ class _HomeContent extends StatelessWidget {
           ),
         ),
         
+        // B5: AnimatedSwitcher — favoriler bos/dolu geçişi
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 24.0),
-            child: Row(
-              children: [
-                Expanded(child: _buildFavoriteCard(context, 'Döviz', LucideIcons.banknote, AppTheme.emerald, '/doviz', isDark)),
-                const SizedBox(width: 16),
-                Expanded(child: _buildFavoriteCard(context, 'KDV', LucideIcons.coins, AppTheme.amber, '/kdv', isDark)),
-              ],
+            child: RepaintBoundary(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                child: favorites.isEmpty
+                    ? const _EmptyFavoritesPlaceholder(key: ValueKey('empty'))
+                    : _FavoritesList(
+                        key: ValueKey(favorites.join(',')),
+                        favorites: favorites,
+                        toolMeta: _toolMeta,
+                        isDark: isDark,
+                      ),
+              ),
             ),
           ),
         ),
@@ -90,135 +128,172 @@ class _HomeContent extends StatelessWidget {
   Widget _buildBentoCategories(BuildContext context, bool isDark) {
     final provider = legacy.Provider.of<AppDataProvider>(context, listen: false);
     final categories = provider.categories;
+    final screenWidth = MediaQuery.of(context).size.width;
 
-    // Mapping categories to prompt sizes
-    // 0: Finansal (Large)
-    // 1: Bankacılık (Medium)
-    // 2: Sağlık (Medium)
-    // 3: Teknik (Small)
-    // 4: Eğitim (Small)
-    // 5: Günlük (Small)
+    // Responsive aspect ratio: küçük ekranlarda biraz daha uzun kart
+    final double aspectRatio = screenWidth < 360 ? 0.90 : 1.00;
 
     return Padding(
       padding: const EdgeInsets.only(top: 8.0),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          return StaggeredGrid.count(
-            crossAxisCount: 2,
-            mainAxisSpacing: 16,
-            crossAxisSpacing: 16,
-            children: categories.asMap().entries.map((entry) {
-              final index = entry.key;
-              final category = entry.value;
+      child: GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          childAspectRatio: aspectRatio,
+        ),
+        itemCount: categories.length,
+        itemBuilder: (context, index) {
+          final category = categories[index];
+          final count = provider.getCalculatorsByCategory(category.id).length;
 
-              // Assign StaggeredGridTile based on index to implement Bento layout
-              int crossAxisCellCount = 1;
-              double mainAxisCellCount = 1;
-
-              if (index == 0) { // Finansal (Large - full width)
-                crossAxisCellCount = 2;
-                mainAxisCellCount = 1.2;
-              } else if (index == 1 || index == 2) { // Bankacılık & Sağlık (Medium)
-                crossAxisCellCount = 1;
-                mainAxisCellCount = 1.4;
-              } else { // Others (Small)
-                crossAxisCellCount = 1;
-                mainAxisCellCount = 1;
-              }
-
-              // Get actual calculator count for this category
-              final count = provider.getCalculatorsByCategory(category.id).length;
-
-              return StaggeredGridTile.count(
-                crossAxisCellCount: crossAxisCellCount,
-                mainAxisCellCount: mainAxisCellCount,
-                child: GestureDetector(
-                  onTap: () => context.push('/category', extra: category),
-                  child: GlassCard(
-                    borderRadius: 24,
-                    color: category.color.withOpacity(0.05), // Very subtle tint
-                    child: Stack(
+          return GestureDetector(
+            onTap: () => context.push('/category', extra: category),
+            child: GlassCard(
+              borderRadius: 24,
+              color: category.color.withValues(alpha: 0.05),
+              child: Stack(
+                children: [
+                  // Dekoratif parlayan orb (değiştirilmedi)
+                  Positioned(
+                    right: -20,
+                    top: -20,
+                    child: Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: category.color.withValues(alpha: isDark ? 0.3 : 0.2),
+                            blurRadius: 40,
+                            spreadRadius: 10,
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Decorative glowing orb in the corner
-                        Positioned(
-                          right: -20,
-                          top: -20,
-                          child: Container(
-                            width: 100,
-                            height: 100,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: category.color.withOpacity(isDark ? 0.3 : 0.2), // Soft glow
-                                  blurRadius: 40,
-                                  spreadRadius: 10,
-                                )
-                              ],
-                            ),
+                        // 1. İkon — üstte sabit (değiştirilmedi)
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
                           ),
+                          child: Icon(category.icon, color: category.color, size: 28),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.all(20.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(color: Colors.white.withOpacity(0.2)),
-                                ),
-                                child: Icon(category.icon, color: category.color, size: index == 0 ? 32 : 28),
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      category.title.toUpperCase(),
-                                      style: TextStyle(
-                                        fontSize: index == 0 ? 18 : 15, // Larger for Financial
-                                        fontWeight: FontWeight.w800,
-                                        letterSpacing: 1.2,
-                                        color: isDark ? Colors.white : Colors.black87,
-                                      ),
-                                    ),
-                                  ),
-                                  // Counter pill
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(20),
-                                      border: Border.all(color: Colors.white.withOpacity(0.2)),
-                                    ),
-                                    child: Text(
-                                      '$count ARAÇ',
-                                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white.withOpacity(0.8)),
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ],
+
+                        // 2. Boşluk — ismi alta iter
+                        const Spacer(),
+
+                        // 3. Kategori ismi — TEK SATIRDA, bölünmez
+                        Text(
+                          category.title.toUpperCase(),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.8,
+                            color: isDark ? Colors.white : Colors.black87,
+                            height: 1.2,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: false,
+                        ),
+
+                        const SizedBox(height: 6),
+
+                        // 4. Araç sayısı badge — ismin hemen altında
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                          ),
+                          child: Text(
+                            '$count ARAÇ',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white.withValues(alpha: 0.8),
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                ),
-              );
-            }).toList(),
+                ],
+              ),
+            ),
           );
         },
       ),
     );
   }
+}
 
+// ── B5: Boş durum placeholder ────────────────────────────
+class _EmptyFavoritesPlaceholder extends StatelessWidget {
+  const _EmptyFavoritesPlaceholder({super.key});
 
-  Widget _buildFavoriteCard(BuildContext context, String title, IconData icon, Color color, String route, bool isDark) {
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Text(
+        'Sık kullandığın araçlar burada görünecek',
+        style: TextStyle(
+          fontSize: 13,
+          color: isDark ? Colors.white38 : Colors.black38,
+          fontStyle: FontStyle.italic,
+        ),
+      ),
+    );
+  }
+}
+
+// ── B5: Dolu favori satırı ───────────────────────────────
+class _FavoritesList extends StatelessWidget {
+  final List<String> favorites;
+  final Map<String, (String, IconData, String)> toolMeta;
+  final bool isDark;
+
+  const _FavoritesList({
+    super.key,
+    required this.favorites,
+    required this.toolMeta,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        for (int i = 0; i < favorites.length; i++) ...[
+          if (i > 0) const SizedBox(width: 12),
+          Expanded(
+            child: _buildCard(context, favorites[i]),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildCard(BuildContext context, String toolId) {
+    final meta = toolMeta[toolId];
+    if (meta == null) return const SizedBox.shrink();
+    final (title, icon, route) = meta;
+
     return GestureDetector(
       onTap: () => context.push(route),
       child: GlassCard(
@@ -229,8 +304,17 @@ class _HomeContent extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Icon(icon, color: color, size: 28),
-            Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: isDark ? Colors.white : AppTheme.darkNavy)),
+            Icon(icon, color: AppTheme.emerald, size: 28),
+            Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : AppTheme.darkNavy,
+              ),
+            ),
           ],
         ),
       ),

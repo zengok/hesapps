@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../widgets/calculator_layout.dart';
-import '../../../utility/data/services/history_service.dart';
 import '../../../utility/data/models/calculation_history.dart';
+import '../../../utility/presentation/providers/history_provider.dart';
 
-class YasHesaplamaScreen extends StatefulWidget {
+class YasHesaplamaScreen extends ConsumerStatefulWidget {
   const YasHesaplamaScreen({super.key});
   @override
-  State<YasHesaplamaScreen> createState() => _YasHesaplamaScreenState();
+  ConsumerState<YasHesaplamaScreen> createState() => _YasHesaplamaScreenState();
 }
 
-class _YasHesaplamaScreenState extends State<YasHesaplamaScreen> {
+class _YasHesaplamaScreenState extends ConsumerState<YasHesaplamaScreen> {
   DateTime? _dogumTarihi;
   String? _resultText;
   bool _showResult = false;
@@ -36,7 +37,7 @@ class _YasHesaplamaScreenState extends State<YasHesaplamaScreen> {
 
     final toplamGun = today.difference(_dogumTarihi!).inDays;
 
-    HistoryService.saveHistory(CalculationHistory(
+    ref.read(historyProvider.notifier).addHistory(CalculationHistory(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: 'Yaş: ${_dogumTarihi!.day}/${_dogumTarihi!.month}/${_dogumTarihi!.year}',
       result: '$yas yıl $ay ay',
@@ -62,7 +63,7 @@ class _YasHesaplamaScreenState extends State<YasHesaplamaScreen> {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.3),
+            color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: Colors.white24),
           ),

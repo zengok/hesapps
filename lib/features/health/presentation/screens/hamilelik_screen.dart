@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../widgets/calculator_layout.dart';
-import '../../../../widgets/custom_input.dart';
-import '../../../utility/data/services/history_service.dart';
 import '../../../utility/data/models/calculation_history.dart';
+import '../../../utility/presentation/providers/history_provider.dart';
 
-class HamilelikScreen extends StatefulWidget {
+class HamilelikScreen extends ConsumerStatefulWidget {
   const HamilelikScreen({super.key});
   @override
-  State<HamilelikScreen> createState() => _HamilelikScreenState();
+  ConsumerState<HamilelikScreen> createState() => _HamilelikScreenState();
 }
 
-class _HamilelikScreenState extends State<HamilelikScreen> {
+class _HamilelikScreenState extends ConsumerState<HamilelikScreen> {
   DateTime? _sonRegl;
   String? _resultText;
   bool _showResult = false;
@@ -36,7 +36,7 @@ class _HamilelikScreenState extends State<HamilelikScreen> {
     final gun = gecenGun % 7;
     final kalanGun = tahminiDogum.difference(bugun).inDays;
 
-    HistoryService.saveHistory(CalculationHistory(
+    ref.read(historyProvider.notifier).addHistory(CalculationHistory(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: 'Hamilelik: ${_sonRegl!.day}/${_sonRegl!.month}/${_sonRegl!.year}',
       result: 'Tahmini Doğum: ${tahminiDogum.day}/${tahminiDogum.month}/${tahminiDogum.year}',
@@ -64,7 +64,7 @@ class _HamilelikScreenState extends State<HamilelikScreen> {
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.3),
+              color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: Colors.white24),
             ),

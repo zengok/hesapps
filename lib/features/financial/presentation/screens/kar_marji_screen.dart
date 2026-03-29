@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../widgets/calculator_layout.dart';
 import '../../../../widgets/custom_input.dart';
-import '../../../utility/data/services/history_service.dart';
 import '../../../utility/data/models/calculation_history.dart';
+import '../../../utility/presentation/providers/history_provider.dart';
 
-class KarMarjiScreen extends StatefulWidget {
+class KarMarjiScreen extends ConsumerStatefulWidget {
   const KarMarjiScreen({super.key});
   @override
-  State<KarMarjiScreen> createState() => _KarMarjiScreenState();
+  ConsumerState<KarMarjiScreen> createState() => _KarMarjiScreenState();
 }
 
-class _KarMarjiScreenState extends State<KarMarjiScreen> {
+class _KarMarjiScreenState extends ConsumerState<KarMarjiScreen> {
   final _maliyetCtrl = TextEditingController();
   final _satisCtrl = TextEditingController();
   String? _resultText;
@@ -26,7 +27,7 @@ class _KarMarjiScreenState extends State<KarMarjiScreen> {
     final karMarji = (kar / satis) * 100;
     final karOrani = (kar / maliyet) * 100;
 
-    HistoryService.saveHistory(CalculationHistory(
+    ref.read(historyProvider.notifier).addHistory(CalculationHistory(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: 'Kar Marjı: $maliyet → $satis ₺',
       result: 'Kar Marjı: %${karMarji.toStringAsFixed(2)}',

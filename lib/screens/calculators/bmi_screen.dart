@@ -1,24 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../widgets/calculator_layout.dart';
 import '../../widgets/custom_input.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/theme.dart';
+import '../../providers/usage_provider.dart';
 
-class BmiScreen extends StatefulWidget {
-  const BmiScreen({Key? key}) : super(key: key);
+class BmiScreen extends ConsumerStatefulWidget {
+  const BmiScreen({super.key});
 
   @override
-  State<BmiScreen> createState() => _BmiScreenState();
+  ConsumerState<BmiScreen> createState() => _BmiScreenState();
 }
 
-class _BmiScreenState extends State<BmiScreen> {
+class _BmiScreenState extends ConsumerState<BmiScreen> {
   final TextEditingController _heightController = TextEditingController();
   final TextEditingController _weightController = TextEditingController();
   
   String? _resultText;
-  String _bmiCategory = "";
-  Color _bmiColor = Colors.transparent;
-  double _bmiValue = 0;
   bool _showResult = false;
 
   void _calculate() {
@@ -52,12 +51,11 @@ class _BmiScreenState extends State<BmiScreen> {
     }
 
     setState(() {
-      _bmiValue = bmi;
       _resultText = "${bmi.toStringAsFixed(1)}\n($category)";
-      _bmiCategory = category;
-      _bmiColor = color;
       _showResult = true;
     });
+    // B3: kullanım kaydı
+    ref.read(usageProvider.notifier).recordUsage('bmi');
   }
 
   @override
@@ -92,9 +90,9 @@ class _BmiScreenState extends State<BmiScreen> {
             opacity: _showResult ? 1.0 : 0.0,
             child: _showResult ? Column(
               children: [
-                Row(
+                const Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: const [
+                  children: [
                     Text("Zayıf (18.5 ↓)", style: TextStyle(color: Colors.lightBlue, fontSize: 11)),
                     Text("Normal", style: TextStyle(color: AppTheme.emerald, fontSize: 11)),
                     Text("Fazla", style: TextStyle(color: AppTheme.amber, fontSize: 11)),

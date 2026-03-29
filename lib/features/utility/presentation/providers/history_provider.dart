@@ -11,8 +11,9 @@ class HistoryNotifier extends AsyncNotifier<List<CalculationHistory>> {
 
   Future<void> addHistory(CalculationHistory item) async {
     await HistoryService.saveHistory(item);
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => HistoryService.getHistory());
+    // Optimistic update: listeye prepend et, tam reload gerekmez
+    final current = state.value ?? [];
+    state = AsyncValue.data([item, ...current]);
   }
 
   Future<void> refresh() async {

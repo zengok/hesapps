@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../widgets/calculator_layout.dart';
 import '../../../../widgets/custom_input.dart';
 import '../../../../widgets/glass_card.dart';
 import '../../../../theme/app_theme.dart';
 import '../../domain/usecases/calculate_salary.dart';
-import '../../../utility/data/services/history_service.dart';
 import '../../../utility/data/models/calculation_history.dart';
+import '../../../utility/presentation/providers/history_provider.dart';
 
-class MaasVergiScreen extends StatefulWidget {
+class MaasVergiScreen extends ConsumerStatefulWidget {
   const MaasVergiScreen({super.key});
 
   @override
-  State<MaasVergiScreen> createState() => _MaasVergiScreenState();
+  ConsumerState<MaasVergiScreen> createState() => _MaasVergiScreenState();
 }
 
-class _MaasVergiScreenState extends State<MaasVergiScreen> {
+class _MaasVergiScreenState extends ConsumerState<MaasVergiScreen> {
   final TextEditingController _grossController = TextEditingController();
   final TextEditingController _cumController = TextEditingController(); // Kümülatif matrah
 
@@ -23,6 +24,14 @@ class _MaasVergiScreenState extends State<MaasVergiScreen> {
   bool _showResult = false;
   List<double> _netSalaries = [];
   double _currentTaxRate = 0.15;
+
+  String _maasYorumu(double brutMaas, double netMaas) {
+    if (brutMaas <= 0) return '';
+    final kesinti = brutMaas - netMaas;
+    final kesintiyOrani = ((kesinti / brutMaas) * 100).round();
+    return 'Brütten %$kesintiyOrani kesinti yapıldı — '
+           'eline ${netMaas.toStringAsFixed(0)} ₺ geçiyor.';
+  }
 
   // 2026 vergi dilim limitleri: kümülatiften mevcut dilimine göre renk hesabı
   static const List<Map<String, dynamic>> _taxBrackets = [
@@ -71,7 +80,7 @@ class _MaasVergiScreenState extends State<MaasVergiScreen> {
       _showResult = true;
     });
 
-    HistoryService.saveHistory(CalculationHistory(
+    ref.read(historyProvider.notifier).addHistory(CalculationHistory(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: 'Maaş & Vergi: $gross ₺',
       result: 'Net: ${salaries[0].toStringAsFixed(2)} ₺',
@@ -124,7 +133,7 @@ class _MaasVergiScreenState extends State<MaasVergiScreen> {
               children: [
                 Row(
                   children: [
-                    Icon(LucideIcons.barChart2, color: AppTheme.indigo, size: 18),
+                    const Icon(LucideIcons.barChart2, color: AppTheme.indigo, size: 18),
                     const SizedBox(width: 8),
                     Text(
                       '2026 Vergi Dilimleri',
@@ -149,10 +158,10 @@ class _MaasVergiScreenState extends State<MaasVergiScreen> {
                         decoration: BoxDecoration(
                           color: isActive
                               ? (b['color'] as Color)
-                              : (b['color'] as Color).withOpacity(0.3),
+                              : (b['color'] as Color).withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(4),
                           boxShadow: isActive
-                              ? [BoxShadow(color: (b['color'] as Color).withOpacity(0.7), blurRadius: 8, spreadRadius: 1)]
+                              ? [BoxShadow(color: (b['color'] as Color).withValues(alpha: 0.7), blurRadius: 8, spreadRadius: 1)]
                               : [],
                         ),
                       ),
@@ -182,13 +191,13 @@ class _MaasVergiScreenState extends State<MaasVergiScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.07),
+                      color: Colors.white.withValues(alpha: 0.07),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
+                        const Text(
                           'Aktif Dilim: ',
                           style: TextStyle(color: Colors.white54, fontSize: 13),
                         ),
@@ -248,7 +257,7 @@ class _MaasVergiScreenState extends State<MaasVergiScreen> {
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
-                          color: i == 0 ? AppTheme.emerald : Colors.white70,
+                          color: i == 0 ? AppTheme.emerald : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                         ),
                       ),
                     ],
@@ -258,6 +267,22 @@ class _MaasVergiScreenState extends State<MaasVergiScreen> {
             ),
             const SizedBox(height: 20),
           ],
+          if (_showResult && _netSalaries.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Center(
+                child: Text(
+                  _maasYorumu(
+                    double.tryParse(_grossController.text.replaceAll(',', '.')) ?? 0,
+                    _netSalaries.isNotEmpty ? _netSalaries[0] : 0,
+                  ),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
         ],
       ),
     );

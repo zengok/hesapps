@@ -27,6 +27,8 @@ class _GlassButtonState extends State<GlassButton> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return GestureDetector(
       onTapDown: (_) => setState(() => _isPressed = true),
       onTapUp: (_) {
@@ -40,22 +42,22 @@ class _GlassButtonState extends State<GlassButton> {
         height: widget.height,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(widget.borderRadius > 20 ? widget.borderRadius : 100.0), // Pill-shaped by default
-          color: Colors.white.withOpacity(0.1), // 10% opaque white fill
+          color: isDark ? Colors.white.withValues(alpha: 0.1) : const Color(0xFF1A1A2E).withValues(alpha: 0.1),
           border: Border.all(
-            color: Colors.white.withOpacity(0.3),
+            color: isDark ? const Color(0x4DFFFFFF) : const Color(0x1A000000),
             width: 1.2, // 1.2px crisp white border
           ),
           boxShadow: _isPressed 
             ? [
                 BoxShadow(
-                  color: Colors.white.withOpacity(0.4), // Soft white outer glow
+                  color: isDark ? Colors.white.withValues(alpha: 0.4) : Colors.black.withValues(alpha: 0.1), // Soft white outer glow
                   blurRadius: 30,
                   spreadRadius: 2,
                 )
               ] 
             : [
                 BoxShadow(
-                  color: Colors.white.withOpacity(0.1), // Slight constant glow
+                  color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.transparent, // Slight constant glow
                   blurRadius: 15,
                   spreadRadius: -2,
                 )

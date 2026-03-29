@@ -8,6 +8,8 @@ import '../../screens/main_scaffold.dart';
 import '../../screens/category_screen.dart';
 import '../../screens/history_screen.dart';
 import '../../models/category_model.dart';
+import '../../screens/search_screen.dart';
+import '../../screens/about_screen.dart';
 
 // Finansal
 import '../../features/financial/presentation/screens/kdv_screen.dart';
@@ -55,10 +57,11 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       ShellRoute(
         navigatorKey: shellNavigatorKey,
-        builder: (context, state, child) => MainScaffold(child: child),
+        pageBuilder: (context, state, child) => NoTransitionPage(child: MainScaffold(child: child)),
         routes: [
           GoRoute(path: '/', builder: (context, state) => const HomeScreen()),
           GoRoute(path: '/history', builder: (context, state) => const HistoryScreen()),
+          GoRoute(path: '/search', builder: (context, state) => const SearchScreen()),
           GoRoute(path: '/settings', builder: (context, state) => const SettingsScreen()),
         ],
       ),
@@ -100,6 +103,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/bahsis', parentNavigatorKey: rootNavigatorKey, builder: (_, __) => const BahsisScreen()),
       GoRoute(path: '/indirimlifiyat', parentNavigatorKey: rootNavigatorKey, builder: (_, __) => const IndirimFiyatScreen()),
       GoRoute(path: '/tarihfarki', parentNavigatorKey: rootNavigatorKey, builder: (_, __) => const TarihFarkiScreen()),
+      GoRoute(path: '/about', parentNavigatorKey: rootNavigatorKey, builder: (context, state) => const AboutScreen()),
     ],
   );
 });

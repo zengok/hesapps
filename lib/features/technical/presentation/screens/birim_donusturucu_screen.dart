@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../widgets/calculator_layout.dart';
 import '../../../../widgets/custom_input.dart';
-import '../../../utility/data/services/history_service.dart';
 import '../../../utility/data/models/calculation_history.dart';
+import '../../../utility/presentation/providers/history_provider.dart';
 
-class BirimDonusturucuScreen extends StatefulWidget {
+class BirimDonusturucuScreen extends ConsumerStatefulWidget {
   const BirimDonusturucuScreen({super.key});
   @override
-  State<BirimDonusturucuScreen> createState() => _BirimDonusturucuScreenState();
+  ConsumerState<BirimDonusturucuScreen> createState() => _BirimDonusturucuScreenState();
 }
 
-class _BirimDonusturucuScreenState extends State<BirimDonusturucuScreen> {
+class _BirimDonusturucuScreenState extends ConsumerState<BirimDonusturucuScreen> {
   final _degerCtrl = TextEditingController();
   String _kategori = 'Uzunluk';
   String _from = 'Metre';
@@ -36,10 +37,10 @@ class _BirimDonusturucuScreenState extends State<BirimDonusturucuScreen> {
     // Önce baz birime çevir, sonra hedef birime
     final sonuc = deger / fromFactor * toFactor;
 
-    HistoryService.saveHistory(CalculationHistory(
+    ref.read(historyProvider.notifier).addHistory(CalculationHistory(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: 'Birim: $deger $_from → $_to',
-      result: '${sonuc.toStringAsFixed(6).replaceAll(RegExp(r'0+$'), '')} $_to',
+      result: '${sonuc.toStringAsFixed(6)} $_to',
       date: DateTime.now(),
     ));
     setState(() {
@@ -71,7 +72,7 @@ class _BirimDonusturucuScreenState extends State<BirimDonusturucuScreen> {
               _showResult = false;
             }),
             child: Container(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(color: sel ? Colors.blue.withOpacity(0.3) : Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(20), border: Border.all(color: sel ? Colors.blue : Colors.white24)),
+              decoration: BoxDecoration(color: sel ? Colors.blue.withValues(alpha: 0.3) : Colors.white.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(20), border: Border.all(color: sel ? Colors.blue : Colors.white24)),
               child: Text(k, style: TextStyle(color: textColor, fontSize: 13))),
           );
         }).toList()),
@@ -79,12 +80,12 @@ class _BirimDonusturucuScreenState extends State<BirimDonusturucuScreen> {
         CustomInput(controller: _degerCtrl, hintText: 'Değer', keyboardType: const TextInputType.numberWithOptions(decimal: true), prefixIcon: LucideIcons.hash, onChanged: (_) => setState(() => _showResult = false)),
         const SizedBox(height: 16),
         Row(children: [
-          Expanded(child: Container(padding: const EdgeInsets.symmetric(horizontal: 12), decoration: BoxDecoration(color: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.3), borderRadius: BorderRadius.circular(16)),
+          Expanded(child: Container(padding: const EdgeInsets.symmetric(horizontal: 12), decoration: BoxDecoration(color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(16)),
             child: DropdownButtonHideUnderline(child: DropdownButton<String>(value: _from, dropdownColor: ddColor, isExpanded: true,
               items: _birimListesi.map((b) => DropdownMenuItem(value: b, child: Text(b, style: TextStyle(color: textColor, fontSize: 13)))).toList(),
               onChanged: (v) => setState(() { _from = v!; _showResult = false; }))))),
           Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: Icon(LucideIcons.repeat, color: Colors.blue.shade300)),
-          Expanded(child: Container(padding: const EdgeInsets.symmetric(horizontal: 12), decoration: BoxDecoration(color: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.3), borderRadius: BorderRadius.circular(16)),
+          Expanded(child: Container(padding: const EdgeInsets.symmetric(horizontal: 12), decoration: BoxDecoration(color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(16)),
             child: DropdownButtonHideUnderline(child: DropdownButton<String>(value: _to, dropdownColor: ddColor, isExpanded: true,
               items: _birimListesi.map((b) => DropdownMenuItem(value: b, child: Text(b, style: TextStyle(color: textColor, fontSize: 13)))).toList(),
               onChanged: (v) => setState(() { _to = v!; _showResult = false; }))))),

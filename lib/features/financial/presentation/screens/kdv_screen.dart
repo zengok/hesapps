@@ -1,26 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../widgets/calculator_layout.dart';
 import '../../../../widgets/custom_input.dart';
 import '../../../../theme/app_theme.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../widgets/glass_button.dart';
 import '../../domain/usecases/calculate_kdv.dart';
-import '../../../utility/data/services/history_service.dart';
 import '../../../utility/data/models/calculation_history.dart';
+import '../../../utility/presentation/providers/history_provider.dart';
 
-class KdvScreen extends StatefulWidget {
+class KdvScreen extends ConsumerStatefulWidget {
   const KdvScreen({super.key});
 
   @override
-  State<KdvScreen> createState() => _KdvScreenState();
+  ConsumerState<KdvScreen> createState() => _KdvScreenState();
 }
 
-class _KdvScreenState extends State<KdvScreen> {
+class _KdvScreenState extends ConsumerState<KdvScreen> {
   final TextEditingController _amountController = TextEditingController();
   double _selectedRate = 20.0;
   bool _isKdvIncluded = false; 
   String? _resultText;
   bool _showResult = false;
+  double _lastKdvAmount = 0.0;
+
+  String _kdvYorumu(double kdvTutar, double kdvOrani) {
+    return 'Bu faturanın %${kdvOrani.toStringAsFixed(0)}\'i olan '
+           '${kdvTutar.toStringAsFixed(2)} ₺ devlete gidiyor.';
+  }
 
   void _calculate() {
     FocusScope.of(context).unfocus(); 
@@ -32,7 +39,7 @@ class _KdvScreenState extends State<KdvScreen> {
     final result = useCase.execute(amount, _selectedRate, _isKdvIncluded);
     final resultMsg = "Net: ${result.netAmount.toStringAsFixed(2)} ₺\nKDV: ${result.kdvAmount.toStringAsFixed(2)} ₺\nToplam: ${result.totalAmount.toStringAsFixed(2)} ₺";
 
-    HistoryService.saveHistory(CalculationHistory(
+    ref.read(historyProvider.notifier).addHistory(CalculationHistory(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: "KDV: $amount ₺ (%$_selectedRate)",
       result: "Toplam: ${result.totalAmount.toStringAsFixed(2)} ₺",
@@ -41,13 +48,13 @@ class _KdvScreenState extends State<KdvScreen> {
 
     setState(() {
       _resultText = resultMsg;
+      _lastKdvAmount = result.kdvAmount;
       _showResult = true;
     });
   }
 
   Widget _buildRateButton(double rate) {
     bool isSelected = _selectedRate == rate;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return Expanded(
       child: Padding(
@@ -110,7 +117,7 @@ class _KdvScreenState extends State<KdvScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.3),
+              color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
@@ -145,6 +152,19 @@ class _KdvScreenState extends State<KdvScreen> {
               ],
             ),
           ),
+          if (_showResult)
+            Padding(
+              padding: const EdgeInsets.only(top: 16),
+              child: Center(
+                child: Text(
+                  _kdvYorumu(_lastKdvAmount, _selectedRate),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
         ],
       ),
     );

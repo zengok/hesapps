@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../widgets/calculator_layout.dart';
 import '../../widgets/custom_input.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/theme.dart';
+import '../../providers/usage_provider.dart';
 
-class DovizScreen extends StatefulWidget {
-  const DovizScreen({Key? key}) : super(key: key);
+class DovizScreen extends ConsumerStatefulWidget {
+  const DovizScreen({super.key});
 
   @override
-  State<DovizScreen> createState() => _DovizScreenState();
+  ConsumerState<DovizScreen> createState() => _DovizScreenState();
 }
 
-class _DovizScreenState extends State<DovizScreen> {
+class _DovizScreenState extends ConsumerState<DovizScreen> {
   final TextEditingController _amountController = TextEditingController();
   
   String _fromCurrency = "USD";
@@ -47,6 +49,8 @@ class _DovizScreenState extends State<DovizScreen> {
       _resultText = "${result.toStringAsFixed(2)} $_toCurrency";
       _showResult = true;
     });
+    // B3: kullanım kaydı
+    ref.read(usageProvider.notifier).recordUsage('doviz');
   }
 
   Widget _buildDropdown(String value, ValueChanged<String?> onChanged) {
@@ -55,9 +59,9 @@ class _DovizScreenState extends State<DovizScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.3),
+        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: isDark ? Colors.transparent : Colors.black.withOpacity(0.05)),
+        border: Border.all(color: isDark ? Colors.transparent : Colors.black.withValues(alpha: 0.05)),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(

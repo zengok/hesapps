@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../widgets/calculator_layout.dart';
 import '../../../../widgets/custom_input.dart';
-import '../../../utility/data/services/history_service.dart';
 import '../../../utility/data/models/calculation_history.dart';
+import '../../../utility/presentation/providers/history_provider.dart';
 
-class EnflasyonScreen extends StatefulWidget {
+class EnflasyonScreen extends ConsumerStatefulWidget {
   const EnflasyonScreen({super.key});
   @override
-  State<EnflasyonScreen> createState() => _EnflasyonScreenState();
+  ConsumerState<EnflasyonScreen> createState() => _EnflasyonScreenState();
 }
 
-class _EnflasyonScreenState extends State<EnflasyonScreen> {
+class _EnflasyonScreenState extends ConsumerState<EnflasyonScreen> {
   final _tutarCtrl = TextEditingController();
   final _oranCtrl = TextEditingController();
   final _yilCtrl = TextEditingController();
@@ -26,13 +27,12 @@ class _EnflasyonScreenState extends State<EnflasyonScreen> {
 
     // Bileşik enflasyon formülü: FV = PV * (1 + r)^n
     final gelecegiDeger = tutar * (1 + oran / 100) * yil;
-    final bugunkuDeger = tutar / ((1 + oran / 100) * yil);
     final satirAlmaGucu = (tutar / gelecegiDeger) * 100;
 
-    HistoryService.saveHistory(CalculationHistory(
+    ref.read(historyProvider.notifier).addHistory(CalculationHistory(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: 'Enflasyon: $tutar ₺ × $yil yıl @ %$oran',
-      result: '${yil} yıl sonra: ${gelecegiDeger.toStringAsFixed(2)} ₺',
+      result: '$yil yıl sonra: ${gelecegiDeger.toStringAsFixed(2)} ₺',
       date: DateTime.now(),
     ));
     setState(() {

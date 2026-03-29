@@ -4,10 +4,11 @@ import '../../../../widgets/custom_input.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../theme/app_theme.dart';
 import '../../domain/usecases/calculate_exchange.dart';
-import '../../../utility/data/services/history_service.dart';
 import '../../../utility/data/models/calculation_history.dart';
+import '../../../utility/presentation/providers/history_provider.dart';
 
 import '../../../utility/presentation/providers/exchange_rate_provider.dart';
+import '../../../utility/data/repositories/currency_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class DovizScreen extends ConsumerStatefulWidget {
@@ -34,6 +35,13 @@ class _DovizScreenState extends ConsumerState<DovizScreen> {
 
   String? _resultText;
   bool _showResult = false;
+  double _lastKur = 0.0;
+
+  String _dovizYorumu(double kur, String hedefDoviz) {
+    if (kur == 0.0) return '';
+    return '1 $hedefDoviz = ${kur.toStringAsFixed(4)} $_toCurrency '
+           '(anlık kur kullanıldı).';
+  }
 
   void _calculate() {
     FocusScope.of(context).unfocus();
@@ -45,15 +53,20 @@ class _DovizScreenState extends ConsumerState<DovizScreen> {
 
     final resultTextMsg = "${result.toStringAsFixed(2)} $_toCurrency";
     
-    HistoryService.saveHistory(CalculationHistory(
+    ref.read(historyProvider.notifier).addHistory(CalculationHistory(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: "Döviz Çevrimi: $amount $_fromCurrency",
       result: resultTextMsg,
       date: DateTime.now(),
     ));
 
+    final k = _rates[_fromCurrency] != null && _rates[_toCurrency] != null 
+        ? _rates[_toCurrency]! / _rates[_fromCurrency]! 
+        : 1.0;
+
     setState(() {
       _resultText = resultTextMsg;
+      _lastKur = k;
       _showResult = true;
     });
   }
@@ -64,9 +77,9 @@ class _DovizScreenState extends ConsumerState<DovizScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.3),
+        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: isDark ? Colors.transparent : Colors.black.withOpacity(0.05)),
+        border: Border.all(color: isDark ? Colors.transparent : Colors.black.withValues(alpha: 0.05)),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
@@ -96,6 +109,7 @@ class _DovizScreenState extends ConsumerState<DovizScreen> {
       data: (rates) {
         _rates = rates;
         _useCase = CalculateExchangeUseCase(_rates);
+        final isOffline = CurrencyRepository.lastFetchWasOffline;
         
         return CalculatorLayout(
       title: "Döviz Çevirici",
@@ -137,12 +151,37 @@ class _DovizScreenState extends ConsumerState<DovizScreen> {
               })),
             ],
           ),
+          if (isOffline)
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Text(
+                '● Çevrimdışı — son bilinen kur',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Colors.orange.withValues(alpha: 0.8),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
           const SizedBox(height: 24),
           Text(
             "Uyarı: Gösterilen kurlar temsilidir ve gerçek piyasa koşullarını anlık yansıtmaz.",
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
           ),
+          if (_showResult)
+            Padding(
+              padding: const EdgeInsets.only(top: 16),
+              child: Center(
+                child: Text(
+                  _dovizYorumu(_lastKur, _fromCurrency),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
         ],
       ),
     );

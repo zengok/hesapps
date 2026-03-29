@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../widgets/calculator_layout.dart';
-import '../../../utility/data/services/history_service.dart';
 import '../../../utility/data/models/calculation_history.dart';
+import '../../../utility/presentation/providers/history_provider.dart';
 
-class TarihFarkiScreen extends StatefulWidget {
+class TarihFarkiScreen extends ConsumerStatefulWidget {
   const TarihFarkiScreen({super.key});
   @override
-  State<TarihFarkiScreen> createState() => _TarihFarkiScreenState();
+  ConsumerState<TarihFarkiScreen> createState() => _TarihFarkiScreenState();
 }
 
-class _TarihFarkiScreenState extends State<TarihFarkiScreen> {
+class _TarihFarkiScreenState extends ConsumerState<TarihFarkiScreen> {
   DateTime? _baslangic;
   DateTime? _bitis;
   String? _resultText;
@@ -23,11 +24,16 @@ class _TarihFarkiScreenState extends State<TarihFarkiScreen> {
       firstDate: DateTime(1900),
       lastDate: DateTime(2100),
     );
-    if (picked != null) setState(() {
-      if (isBaslangic) _baslangic = picked;
-      else _bitis = picked;
+    if (picked != null) {
+      setState(() {
+      if (isBaslangic) {
+        _baslangic = picked;
+      } else {
+        _bitis = picked;
+      }
       _showResult = false;
     });
+    }
   }
 
   void _calculate() {
@@ -38,7 +44,7 @@ class _TarihFarkiScreenState extends State<TarihFarkiScreen> {
     final ay = (gun / 30.44).floor();
     final yl = (gun / 365.25).floor();
 
-    HistoryService.saveHistory(CalculationHistory(
+    ref.read(historyProvider.notifier).addHistory(CalculationHistory(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: 'Tarih Farkı',
       result: '$gun gün',
@@ -58,7 +64,7 @@ class _TarihFarkiScreenState extends State<TarihFarkiScreen> {
     Widget dateBtn(String label, DateTime? val, bool isBaslangic) => GestureDetector(
       onTap: () => _pickDate(isBaslangic, context),
       child: Container(padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(color: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.3), borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white24)),
+        decoration: BoxDecoration(color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white24)),
         child: Column(children: [
           Text(label, style: TextStyle(color: isDark ? Colors.white54 : Colors.black45, fontSize: 12)),
           const SizedBox(height: 4),

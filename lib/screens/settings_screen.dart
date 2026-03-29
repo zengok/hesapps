@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+// flutter_staggered_animations — import kaldırıldı (A3)
+import 'package:go_router/go_router.dart';
 
 import '../providers/theme_provider.dart';
 import '../providers/lang_provider.dart';
@@ -41,40 +42,31 @@ class SettingsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Expanded(
-              child: AnimationLimiter(
-                child: ListView(
-                  padding: const EdgeInsets.only(bottom: 120),
-                  children: AnimationConfiguration.toStaggeredList(
-                    duration: const Duration(milliseconds: 450),
-                    childAnimationBuilder: (widget) => SlideAnimation(
-                      verticalOffset: 40.0,
-                      child: FadeInAnimation(child: widget),
-                    ),
-                    children: [
-                      _ThemeToggleCard(isDark: isDark, textColor: textColor),
-                      const SizedBox(height: 16),
-                      _LanguageSelectorCard(isDark: isDark, textColor: textColor),
-                      const SizedBox(height: 16),
-                      _ActionCard(
-                        title: loc.about,
-                        icon: LucideIcons.info,
-                        onTap: () {},
-                        isDark: isDark,
-                        textColor: textColor,
-                        subColor: subColor,
-                      ),
-                      const SizedBox(height: 16),
-                      _ActionCard(
-                        title: loc.rateApp,
-                        icon: LucideIcons.star,
-                        onTap: () {},
-                        isDark: isDark,
-                        textColor: textColor,
-                        subColor: subColor,
-                      ),
-                    ],
+              child: ListView(
+                padding: const EdgeInsets.only(bottom: 120),
+                children: [
+                  _ThemeToggleCard(isDark: isDark, textColor: textColor),
+                  const SizedBox(height: 16),
+                  _LanguageSelectorCard(isDark: isDark, textColor: textColor),
+                  const SizedBox(height: 16),
+                  _ActionCard(
+                    title: loc.about,
+                    icon: LucideIcons.info,
+                    onTap: () => context.push('/about'),
+                    isDark: isDark,
+                    textColor: textColor,
+                    subColor: subColor,
                   ),
-                ),
+                  const SizedBox(height: 16),
+                  _ActionCard(
+                    title: loc.rateApp,
+                    icon: LucideIcons.star,
+                    onTap: () {},
+                    isDark: isDark,
+                    textColor: textColor,
+                    subColor: subColor,
+                  ),
+                ],
               ),
             ),
           ],

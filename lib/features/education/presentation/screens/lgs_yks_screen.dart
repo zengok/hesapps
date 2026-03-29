@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../widgets/calculator_layout.dart';
 import '../../../../widgets/custom_input.dart';
-import '../../../utility/data/services/history_service.dart';
 import '../../../utility/data/models/calculation_history.dart';
+import '../../../utility/presentation/providers/history_provider.dart';
 
-class LgsYksScreen extends StatefulWidget {
+class LgsYksScreen extends ConsumerStatefulWidget {
   const LgsYksScreen({super.key});
   @override
-  State<LgsYksScreen> createState() => _LgsYksScreenState();
+  ConsumerState<LgsYksScreen> createState() => _LgsYksScreenState();
 }
 
-class _LgsYksScreenState extends State<LgsYksScreen> {
+class _LgsYksScreenState extends ConsumerState<LgsYksScreen> {
   String _sinav = 'TYT';
   final Map<String, TextEditingController> _dogru = {};
   final Map<String, TextEditingController> _yanlis = {};
@@ -34,7 +35,7 @@ class _LgsYksScreenState extends State<LgsYksScreen> {
       final y = double.tryParse(_ctrl(_yanlis, ders).text) ?? 0;
       toplamNet += d - (y * 0.25);
     }
-    HistoryService.saveHistory(CalculationHistory(
+    ref.read(historyProvider.notifier).addHistory(CalculationHistory(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: '$_sinav Net Hesaplama',
       result: 'Toplam Net: ${toplamNet.toStringAsFixed(2)}',
@@ -61,7 +62,7 @@ class _LgsYksScreenState extends State<LgsYksScreen> {
           return GestureDetector(
             onTap: () => setState(() { _sinav = s; _showResult = false; }),
             child: Container(padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              decoration: BoxDecoration(color: sel ? Colors.indigo.withOpacity(0.3) : Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(20), border: Border.all(color: sel ? Colors.indigo : Colors.white24)),
+              decoration: BoxDecoration(color: sel ? Colors.indigo.withValues(alpha: 0.3) : Colors.white.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(20), border: Border.all(color: sel ? Colors.indigo : Colors.white24)),
               child: Text(s, style: TextStyle(color: isDark ? Colors.white : Colors.black87))),
           );
         }).toList()),

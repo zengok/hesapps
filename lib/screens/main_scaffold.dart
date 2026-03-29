@@ -14,6 +14,7 @@ class MainScaffold extends StatelessWidget {
     final location = GoRouterState.of(context).uri.toString();
     if (location == '/' || location.isEmpty) return 0;
     if (location.startsWith('/history')) return 1;
+    if (location.startsWith('/search')) return 2;
     if (location.startsWith('/settings')) return 3;
     return 0;
   }
@@ -27,8 +28,7 @@ class MainScaffold extends StatelessWidget {
         context.go('/history');
         break;
       case 2:
-        // Search — ileride eklenecek
-        context.go('/');
+        context.go('/search');
         break;
       case 3:
         context.go('/settings');
@@ -42,7 +42,7 @@ class MainScaffold extends StatelessWidget {
     final selectedIndex = _selectedIndex(context);
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: isDark ? const Color(0xFF0B0E11) : const Color(0xFFF8FAFC),
       extendBody: true,
       body: Container(
         decoration: BoxDecoration(

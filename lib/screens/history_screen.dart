@@ -52,10 +52,10 @@ class HistoryScreen extends ConsumerWidget {
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(color: AppTheme.rose.withAlpha(80)),
                             ),
-                            child: Row(
+                            child: const Row(
                               children: [
                                 Icon(LucideIcons.trash2, color: AppTheme.rose, size: 14),
-                                const SizedBox(width: 4),
+                                SizedBox(width: 4),
                                 Text('Temizle', style: TextStyle(color: AppTheme.rose, fontSize: 12, fontWeight: FontWeight.w600)),
                               ],
                             ),
@@ -123,7 +123,7 @@ class HistoryScreen extends ConsumerWidget {
               Navigator.pop(ctx);
               await ref.read(historyProvider.notifier).clearHistory();
             },
-            child: Text('Temizle', style: TextStyle(color: AppTheme.rose, fontWeight: FontWeight.bold)),
+            child: const Text('Temizle', style: TextStyle(color: AppTheme.rose, fontWeight: FontWeight.bold)),
           ),
         ],
       ),

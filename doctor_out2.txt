@@ -1,0 +1,16 @@
+﻿Doctor summary (to see all details, run flutter doctor -v):
+[!] Flutter (Channel stable, 3.41.5, on Microsoft Windows [Version 10.0.22631.6783], locale tr-TR)
+    ! Warning: `flutter` on your path resolves to C:\Users\g├Âkhan\Downloads\flutter_windows_3.41.5-stable\flutter\bin\flutter, which is not inside your current Flutter SDK checkout at C:\flutter. Consider adding C:\flutter\bin to the front of your path.
+    ! Warning: `dart` on your path resolves to C:\Users\g├Âkhan\Downloads\flutter_windows_3.41.5-stable\flutter\bin\dart, which is not inside your current Flutter SDK checkout at C:\flutter. Consider adding C:\flutter\bin to the front of your path.
+[ÔêÜ] Windows Version (11 Enterprise 64-bit, 23H2, 2009)
+[!] Android toolchain - develop for Android devices (Android SDK version 36.1.0)
+    ! Some Android licenses not accepted. To resolve this, run: flutter doctor --android-licenses
+[ÔêÜ] Chrome - develop for the web
+[X] Visual Studio - develop Windows apps
+    X Visual Studio not installed; this is necessary to develop Windows apps.
+      Download at https://visualstudio.microsoft.com/downloads/.
+      Please install the "Desktop development with C++" workload, including all of its default components
+[ÔêÜ] Connected device (4 available)
+[ÔêÜ] Network resources
+
+! Doctor found issues in 3 categories.

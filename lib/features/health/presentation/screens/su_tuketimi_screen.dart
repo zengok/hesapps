@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../widgets/calculator_layout.dart';
 import '../../../../widgets/custom_input.dart';
-import '../../../utility/data/services/history_service.dart';
 import '../../../utility/data/models/calculation_history.dart';
+import '../../../utility/presentation/providers/history_provider.dart';
 
-class SuTuketimiScreen extends StatefulWidget {
+class SuTuketimiScreen extends ConsumerStatefulWidget {
   const SuTuketimiScreen({super.key});
   @override
-  State<SuTuketimiScreen> createState() => _SuTuketimiScreenState();
+  ConsumerState<SuTuketimiScreen> createState() => _SuTuketimiScreenState();
 }
 
-class _SuTuketimiScreenState extends State<SuTuketimiScreen> {
+class _SuTuketimiScreenState extends ConsumerState<SuTuketimiScreen> {
   final _kiloCtrl = TextEditingController();
   String _aktivite = 'Normal';
   String? _resultText;
@@ -25,7 +26,7 @@ class _SuTuketimiScreenState extends State<SuTuketimiScreen> {
     final gun = kilo * 0.033 * carpan;
     final bardak = (gun / 0.2).ceil();
 
-    HistoryService.saveHistory(CalculationHistory(
+    ref.read(historyProvider.notifier).addHistory(CalculationHistory(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: 'Su Tüketimi: $kilo kg',
       result: 'Günlük: ${gun.toStringAsFixed(1)} L',
@@ -54,7 +55,7 @@ class _SuTuketimiScreenState extends State<SuTuketimiScreen> {
           return GestureDetector(
             onTap: () => setState(() { _aktivite = a; _showResult = false; }),
             child: Container(padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              decoration: BoxDecoration(color: sel ? Colors.blue.withOpacity(0.3) : Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(20), border: Border.all(color: sel ? Colors.blue : Colors.white24)),
+              decoration: BoxDecoration(color: sel ? Colors.blue.withValues(alpha: 0.3) : Colors.white.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(20), border: Border.all(color: sel ? Colors.blue : Colors.white24)),
               child: Text(a, style: TextStyle(color: isDark ? Colors.white : Colors.black87))),
           );
         }).toList()),

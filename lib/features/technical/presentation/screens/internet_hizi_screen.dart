@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../widgets/calculator_layout.dart';
 import '../../../../widgets/custom_input.dart';
-import '../../../utility/data/services/history_service.dart';
 import '../../../utility/data/models/calculation_history.dart';
+import '../../../utility/presentation/providers/history_provider.dart';
 
-class InternetHiziScreen extends StatefulWidget {
+class InternetHiziScreen extends ConsumerStatefulWidget {
   const InternetHiziScreen({super.key});
   @override
-  State<InternetHiziScreen> createState() => _InternetHiziScreenState();
+  ConsumerState<InternetHiziScreen> createState() => _InternetHiziScreenState();
 }
 
-class _InternetHiziScreenState extends State<InternetHiziScreen> {
+class _InternetHiziScreenState extends ConsumerState<InternetHiziScreen> {
   final _hizCtrl = TextEditingController();
   final _dosyaCtrl = TextEditingController();
   String _hizBirim = 'Mbps';
@@ -33,7 +34,7 @@ class _InternetHiziScreenState extends State<InternetHiziScreen> {
     final dakika = saniye / 60;
     final saat = dakika / 60;
 
-    HistoryService.saveHistory(CalculationHistory(
+    ref.read(historyProvider.notifier).addHistory(CalculationHistory(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: 'İndirme: $dosya $_dosyaBirim @ $hiz $_hizBirim',
       result: '${saniye.toStringAsFixed(0)} saniye',
@@ -55,7 +56,7 @@ class _InternetHiziScreenState extends State<InternetHiziScreen> {
     final ddColor = isDark ? const Color(0xFF1E293B) : Colors.white;
     final textColor = isDark ? Colors.white : Colors.black87;
     Widget dropdown(String val, List<String> items, ValueChanged<String?> onChanged) =>
-      Container(padding: const EdgeInsets.symmetric(horizontal: 10), decoration: BoxDecoration(color: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.3), borderRadius: BorderRadius.circular(12)),
+      Container(padding: const EdgeInsets.symmetric(horizontal: 10), decoration: BoxDecoration(color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(12)),
         child: DropdownButtonHideUnderline(child: DropdownButton<String>(value: val, dropdownColor: ddColor,
           items: items.map((i) => DropdownMenuItem(value: i, child: Text(i, style: TextStyle(color: textColor, fontSize: 13)))).toList(),
           onChanged: onChanged)));

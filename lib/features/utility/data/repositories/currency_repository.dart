@@ -5,12 +5,15 @@ import 'dart:convert';
 class CurrencyRepository {
   final Dio _dio = Dio();
   final String _cacheKey = 'cached_exchange_rates';
+  
+  static bool lastFetchWasOffline = false;
 
   Future<Map<String, double>> fetchRates({String baseCurrency = 'USD'}) async {
     try {
       final response = await _dio.get('https://api.frankfurter.app/latest?from=$baseCurrency');
       
       if (response.statusCode == 200) {
+        lastFetchWasOffline = false;
         final Map<String, dynamic> ratesJson = response.data['rates'];
         final rates = ratesJson.map((key, value) => MapEntry(key, (value as num).toDouble()));
         rates[baseCurrency] = 1.0; 
@@ -20,9 +23,11 @@ class CurrencyRepository {
         
         return rates;
       } else {
+        lastFetchWasOffline = true;
         return await _getOfflineRates();
       }
     } catch (e) {
+      lastFetchWasOffline = true;
       return await _getOfflineRates();
     }
   }

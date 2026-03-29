@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+// flutter_staggered_animations — import kaldırıldı (A3)
 import 'package:go_router/go_router.dart';
 
 import '../theme/app_theme.dart';
@@ -70,9 +70,9 @@ class CategoryScreen extends StatelessWidget {
                 ),
               ),
 
-              // Alt Kısım: İlgili Araçların Gözüktüğü Grid (Staggered Animation)
+              // Alt Kısım: Araçların Gözüktüğü Grid (animasyon kaldırıldı — A3)
               Expanded(
-                child: AnimationLimiter(
+                child: RepaintBoundary(
                   child: GridView.builder(
                     padding: const EdgeInsets.all(24.0),
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -84,82 +84,70 @@ class CategoryScreen extends StatelessWidget {
                     itemCount: tools.length,
                     itemBuilder: (context, index) {
                       final tool = tools[index];
-                      return AnimationConfiguration.staggeredGrid(
-                        position: index,
-                        duration: const Duration(milliseconds: 500),
-                        columnCount: 2,
-                        child: ScaleAnimation(
-                          child: FadeInAnimation(
-                            child: GestureDetector(
-                              onTap: () {
-                                // Tüm araçların route haritası
-                                const routeMap = {
-                                  'kdv': '/kdv',
-                                  'maasvergi': '/maasvergi',
-                                  'iskonto': '/iskonto',
-                                  'karmarji': '/karmarji',
-                                  'enflasyon': '/enflasyon',
-                                  'kreditaksit': '/kredi',
-                                  'mevduatgetirisi': '/mevduat',
-                                  'kredikartiasgari': '/kredikartiasgari',
-                                  'doviz': '/doviz',
-                                  'bmi': '/bmi',
-                                  'idealkilo': '/idealkilo',
-                                  'bmr': '/bmr',
-                                  'sutuketimi': '/sutuketimi',
-                                  'hamilelik': '/hamilelik',
-                                  'birim': '/birim',
-                                  'sicaklik': '/sicaklik',
-                                  'yakit': '/yakit',
-                                  'internet': '/internet',
-                                  'lgsyks': '/lgsyks',
-                                  'gno': '/gno',
-                                  'yas': '/yas',
-                                  'bahsis': '/bahsis',
-                                  'indirimlifiyat': '/indirimlifiyat',
-                                  'tarihfarki': '/tarihfarki',
-                                };
-                                final route = routeMap[tool.id];
-                                if (route != null) {
-                                  context.push(route);
-                                }
-                              },
-                              child: GlassCard(
-                                borderRadius: 20,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(12),
-                                        decoration: BoxDecoration(
-                                          color: category.color.withOpacity(0.15),
-                                          borderRadius: BorderRadius.circular(16),
-                                        ),
-                                        child: Icon(
-                                          tool.icon,
-                                          color: category.color,
-                                          size: 26,
-                                        ),
-                                      ),
-                                      const Spacer(),
-                                      Text(
-                                        tool.title,
-                                        style: TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w600,
-                                          color: isDark ? Colors.white : Colors.black87,
-                                          height: 1.2,
-                                        ),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
+                      const routeMap = {
+                        'kdv': '/kdv',
+                        'maasvergi': '/maasvergi',
+                        'iskonto': '/iskonto',
+                        'karmarji': '/karmarji',
+                        'enflasyon': '/enflasyon',
+                        'kreditaksit': '/kredi',
+                        'mevduatgetirisi': '/mevduat',
+                        'kredikartiasgari': '/kredikartiasgari',
+                        'doviz': '/doviz',
+                        'bmi': '/bmi',
+                        'idealkilo': '/idealkilo',
+                        'bmr': '/bmr',
+                        'sutuketimi': '/sutuketimi',
+                        'hamilelik': '/hamilelik',
+                        'birim': '/birim',
+                        'sicaklik': '/sicaklik',
+                        'yakit': '/yakit',
+                        'internet': '/internet',
+                        'lgsyks': '/lgsyks',
+                        'gno': '/gno',
+                        'yas': '/yas',
+                        'bahsis': '/bahsis',
+                        'indirimlifiyat': '/indirimlifiyat',
+                        'tarihfarki': '/tarihfarki',
+                      };
+                      return GestureDetector(
+                        onTap: () {
+                          final route = routeMap[tool.id];
+                          if (route != null) context.push(route);
+                        },
+                        child: GlassCard(
+                          borderRadius: 20,
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: category.color.withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Icon(
+                                    tool.icon,
+                                    color: category.color,
+                                    size: 26,
                                   ),
                                 ),
-                              ),
+                                const Spacer(),
+                                Text(
+                                  tool.title,
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                    color: isDark ? Colors.white : Colors.black87,
+                                    height: 1.2,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
                             ),
                           ),
                         ),

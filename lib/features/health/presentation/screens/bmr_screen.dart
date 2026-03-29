@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../widgets/calculator_layout.dart';
 import '../../../../widgets/custom_input.dart';
-import '../../../utility/data/services/history_service.dart';
 import '../../../utility/data/models/calculation_history.dart';
+import '../../../utility/presentation/providers/history_provider.dart';
 
-class BmrScreen extends StatefulWidget {
+class BmrScreen extends ConsumerStatefulWidget {
   const BmrScreen({super.key});
   @override
-  State<BmrScreen> createState() => _BmrScreenState();
+  ConsumerState<BmrScreen> createState() => _BmrScreenState();
 }
 
-class _BmrScreenState extends State<BmrScreen> {
+class _BmrScreenState extends ConsumerState<BmrScreen> {
   final _kiloctrl = TextEditingController();
   final _boyCtrl = TextEditingController();
   final _yasCtrl = TextEditingController();
@@ -43,7 +44,7 @@ class _BmrScreenState extends State<BmrScreen> {
     }
     final tdee = bmr * (_aktiviteFaktorleri[_aktivite] ?? 1.2);
 
-    HistoryService.saveHistory(CalculationHistory(
+    ref.read(historyProvider.notifier).addHistory(CalculationHistory(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: 'BMR: $kilo kg - $boy cm - $yas yaş',
       result: 'TDEE: ${tdee.toStringAsFixed(0)} kcal',
@@ -75,13 +76,13 @@ class _BmrScreenState extends State<BmrScreen> {
         Row(children: [
           Expanded(child: GestureDetector(
             onTap: () => setState(() { _cinsiyet = 'Erkek'; _showResult = false; }),
-            child: Container(padding: const EdgeInsets.symmetric(vertical: 12), decoration: BoxDecoration(color: _cinsiyet == 'Erkek' ? Colors.blue.withOpacity(0.3) : Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(12), border: Border.all(color: _cinsiyet == 'Erkek' ? Colors.blue : Colors.white24)),
+            child: Container(padding: const EdgeInsets.symmetric(vertical: 12), decoration: BoxDecoration(color: _cinsiyet == 'Erkek' ? Colors.blue.withValues(alpha: 0.3) : Colors.white.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(12), border: Border.all(color: _cinsiyet == 'Erkek' ? Colors.blue : Colors.white24)),
               child: Center(child: Text('Erkek', style: TextStyle(color: isDark ? Colors.white : Colors.black87)))),
           )),
           const SizedBox(width: 12),
           Expanded(child: GestureDetector(
             onTap: () => setState(() { _cinsiyet = 'Kadın'; _showResult = false; }),
-            child: Container(padding: const EdgeInsets.symmetric(vertical: 12), decoration: BoxDecoration(color: _cinsiyet == 'Kadın' ? Colors.pink.withOpacity(0.3) : Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(12), border: Border.all(color: _cinsiyet == 'Kadın' ? Colors.pink : Colors.white24)),
+            child: Container(padding: const EdgeInsets.symmetric(vertical: 12), decoration: BoxDecoration(color: _cinsiyet == 'Kadın' ? Colors.pink.withValues(alpha: 0.3) : Colors.white.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(12), border: Border.all(color: _cinsiyet == 'Kadın' ? Colors.pink : Colors.white24)),
               child: Center(child: Text('Kadın', style: TextStyle(color: isDark ? Colors.white : Colors.black87)))),
           )),
         ]),
@@ -94,7 +95,7 @@ class _BmrScreenState extends State<BmrScreen> {
           return GestureDetector(
             onTap: () => setState(() { _aktivite = a; _showResult = false; }),
             child: Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              decoration: BoxDecoration(color: isSelected ? Colors.green.withOpacity(0.3) : Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(20), border: Border.all(color: isSelected ? Colors.green : Colors.white24)),
+              decoration: BoxDecoration(color: isSelected ? Colors.green.withValues(alpha: 0.3) : Colors.white.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(20), border: Border.all(color: isSelected ? Colors.green : Colors.white24)),
               child: Text(a, style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 13))),
           );
         }).toList()),

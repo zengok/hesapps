@@ -51,10 +51,11 @@ class _CustomInputState extends State<CustomInput> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final Color textColor = isDark ? Colors.white : const Color(0xFF0F172A);
-    final Color hintColor = isDark ? Colors.white38 : Colors.black38;
-    final Color iconColor =
-        _isFocused ? AppTheme.emerald : (isDark ? Colors.white38 : Colors.black38);
+    
+    // Theme.of(context) bazlı renkler
+    final Color textColor = Theme.of(context).colorScheme.onSurface;
+    final Color hintColor = Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5);
+    final Color iconColor = _isFocused ? AppTheme.emerald : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5);
 
     // Frosted glass border — odaklanınca emerald parlaması
     final Color borderColor = _isFocused

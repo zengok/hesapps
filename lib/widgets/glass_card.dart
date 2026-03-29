@@ -25,21 +25,22 @@ class GlassCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // Dark: 10% white fill. Light: near-white fill with slight dark shadow for contrast
-    final Color backgroundColor = color ??
-        (isDark
-            ? Colors.white.withAlpha(26)   // 10% white — Cosmic void glass
-            : Colors.white.withAlpha(179)); // 70% white — Bright frosted glass
+    // Cam efekti rengi:
+    final glassColor = isDark
+        ? Colors.white.withValues(alpha: 0.08)   // koyu: beyaz cam
+        : Colors.black.withValues(alpha: 0.06);  // açık: siyah cam
 
-    final Color borderColor = isDark
-        ? Colors.white.withAlpha(38)  // 15% white border in dark
-        : Colors.black.withAlpha(20); // 8% black border in light for definition
+    // Kenarlık rengi:
+    final borderColor = isDark
+        ? Colors.white.withValues(alpha: 0.15)
+        : Colors.black.withValues(alpha: 0.10);
 
     return Container(
       width: width,
       height: height,
       margin: margin,
       decoration: BoxDecoration(
+        color: glassColor,
         borderRadius: BorderRadius.circular(borderRadius),
         // Light mode: subtle drop shadow for depth
         boxShadow: isDark
@@ -54,22 +55,31 @@ class GlassCard extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(borderRadius),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 12.0, sigmaY: 12.0),
-          child: Container(
-            padding: padding,
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              borderRadius: BorderRadius.circular(borderRadius),
-              border: Border.all(
-                color: borderColor,
-                width: 1.2, // 1.2px crisp border
+        child: RepaintBoundary(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: _adaptiveSigma(context), sigmaY: _adaptiveSigma(context)),
+            child: Container(
+              padding: padding,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(borderRadius),
+                border: Border.all(
+                  color: color ?? borderColor,
+                  width: 1.2, // 1.2px crisp border
+                ),
               ),
+              child: child,
             ),
-            child: child,
           ),
         ),
       ),
     );
+  }
+
+  /// A6: Düşük segment cihazlarda blur'u azalt
+  static double _adaptiveSigma(BuildContext context) {
+    final ratio = MediaQuery.of(context).devicePixelRatio;
+    if (ratio >= 3.0) return 12.0; // yüksek end
+    if (ratio >= 2.0) return 8.0;  // orta segment
+    return 4.0;                    // düşük segment
   }
 }

@@ -1,26 +1,41 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../widgets/calculator_layout.dart';
 import '../../../../widgets/custom_input.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import '../../../utility/data/services/history_service.dart';
 import '../../../utility/data/models/calculation_history.dart';
 import 'package:decimal/decimal.dart';
 import '../../domain/usecases/calculate_credit.dart';
+import '../../../utility/presentation/providers/history_provider.dart';
 
-class KrediScreen extends StatefulWidget {
+class KrediScreen extends ConsumerStatefulWidget {
   const KrediScreen({super.key});
 
   @override
-  State<KrediScreen> createState() => _KrediScreenState();
+  ConsumerState<KrediScreen> createState() => _KrediScreenState();
 }
 
-class _KrediScreenState extends State<KrediScreen> {
+class _KrediScreenState extends ConsumerState<KrediScreen> {
   final TextEditingController _principalController = TextEditingController();
   final TextEditingController _rateController = TextEditingController();
   final TextEditingController _monthsController = TextEditingController();
   
   String? _resultText;
   bool _showResult = false;
+
+  String _krediYorumu(double aylikTaksit, double anaparaTL, int vadeAy) {
+    final toplamOdeme = aylikTaksit * vadeAy;
+    final toplamFaiz = toplamOdeme - anaparaTL;
+    final faizOrani = (toplamFaiz / anaparaTL) * 100;
+
+    if (faizOrani < 20) {
+      return 'Toplam faiz yükü düşük — avantajlı bir kredi.';
+    }
+    if (faizOrani < 50) {
+      return 'Toplam ${toplamFaiz.toStringAsFixed(0)} ₺ faiz ödenecek.';
+    }
+    return 'Dikkat: Anapara\'nın %${faizOrani.toStringAsFixed(0)}\'i kadar faiz ödeniyor.';
+  }
 
   void _calculate() {
     FocusScope.of(context).unfocus();
@@ -35,7 +50,7 @@ class _KrediScreenState extends State<KrediScreen> {
     final result = useCase.execute(Decimal.parse(p.toString()), Decimal.parse(rate.toString()), n);
     final resultMsg = "Taksit: ${result.installment.toStringAsFixed(2)} ₺\nToplam: ${result.totalPaid.toStringAsFixed(2)} ₺";
 
-    HistoryService.saveHistory(CalculationHistory(
+    ref.read(historyProvider.notifier).addHistory(CalculationHistory(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: "Kredi: $p ₺ ($n Ay)",
       result: "Taksit: ${result.installment.toStringAsFixed(2)} ₺",
@@ -79,6 +94,21 @@ class _KrediScreenState extends State<KrediScreen> {
             prefixIcon: LucideIcons.calendar,
             onChanged: (val) => setState(() => _showResult = false),
           ),
+          if (_showResult)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                _krediYorumu(
+                  double.tryParse(_resultText?.split('Taksit: ').last.split(' ').first.replaceAll(',', '.') ?? '0') ?? 0,
+                  double.tryParse(_principalController.text.replaceAll(',', '.')) ?? 0,
+                  int.tryParse(_monthsController.text) ?? 1,
+                ),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
         ],
       ),
     );

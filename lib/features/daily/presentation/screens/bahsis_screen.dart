@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../widgets/calculator_layout.dart';
 import '../../../../widgets/custom_input.dart';
-import '../../../utility/data/services/history_service.dart';
 import '../../../utility/data/models/calculation_history.dart';
+import '../../../utility/presentation/providers/history_provider.dart';
 
-class BahsisScreen extends StatefulWidget {
+class BahsisScreen extends ConsumerStatefulWidget {
   const BahsisScreen({super.key});
   @override
-  State<BahsisScreen> createState() => _BahsisScreenState();
+  ConsumerState<BahsisScreen> createState() => _BahsisScreenState();
 }
 
-class _BahsisScreenState extends State<BahsisScreen> {
+class _BahsisScreenState extends ConsumerState<BahsisScreen> {
   final _tutarCtrl = TextEditingController();
   final _kisCtrl = TextEditingController();
   double _oran = 10;
@@ -26,7 +27,7 @@ class _BahsisScreenState extends State<BahsisScreen> {
     final toplamBahsis = tutar * _oran / 100;
     final kisiBasina = toplamBahsis / kis;
 
-    HistoryService.saveHistory(CalculationHistory(
+    ref.read(historyProvider.notifier).addHistory(CalculationHistory(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: 'Bahşiş: $tutar ₺ × %${_oran.toInt()}',
       result: 'Toplam: ${toplamBahsis.toStringAsFixed(2)} ₺',

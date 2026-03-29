@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../widgets/calculator_layout.dart';
 import '../../../../widgets/custom_input.dart';
-import '../../../utility/data/services/history_service.dart';
 import '../../../utility/data/models/calculation_history.dart';
+import '../../../utility/presentation/providers/history_provider.dart';
 
-class IdealKiloScreen extends StatefulWidget {
+class IdealKiloScreen extends ConsumerStatefulWidget {
   const IdealKiloScreen({super.key});
   @override
-  State<IdealKiloScreen> createState() => _IdealKiloScreenState();
+  ConsumerState<IdealKiloScreen> createState() => _IdealKiloScreenState();
 }
 
-class _IdealKiloScreenState extends State<IdealKiloScreen> {
+class _IdealKiloScreenState extends ConsumerState<IdealKiloScreen> {
   final _boyCtrl = TextEditingController();
   String _cinsiyet = 'Erkek';
   String? _resultText;
@@ -31,7 +32,7 @@ class _IdealKiloScreenState extends State<IdealKiloScreen> {
     final minKilo = idealKilo - 5;
     final maxKilo = idealKilo + 5;
 
-    HistoryService.saveHistory(CalculationHistory(
+    ref.read(historyProvider.notifier).addHistory(CalculationHistory(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: 'İdeal Kilo: $boy cm ($_cinsiyet)',
       result: 'İdeal: ${idealKilo.toStringAsFixed(1)} kg',
@@ -62,7 +63,7 @@ class _IdealKiloScreenState extends State<IdealKiloScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 14),
               decoration: BoxDecoration(
-                color: _cinsiyet == 'Erkek' ? Colors.blue.withOpacity(0.3) : Colors.white.withOpacity(0.05),
+                color: _cinsiyet == 'Erkek' ? Colors.blue.withValues(alpha: 0.3) : Colors.white.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: _cinsiyet == 'Erkek' ? Colors.blue : Colors.white24),
               ),
@@ -75,7 +76,7 @@ class _IdealKiloScreenState extends State<IdealKiloScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 14),
               decoration: BoxDecoration(
-                color: _cinsiyet == 'Kadın' ? Colors.pink.withOpacity(0.3) : Colors.white.withOpacity(0.05),
+                color: _cinsiyet == 'Kadın' ? Colors.pink.withValues(alpha: 0.3) : Colors.white.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: _cinsiyet == 'Kadın' ? Colors.pink : Colors.white24),
               ),

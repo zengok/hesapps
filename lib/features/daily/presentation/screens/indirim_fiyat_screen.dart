@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../widgets/calculator_layout.dart';
 import '../../../../widgets/custom_input.dart';
-import '../../../utility/data/services/history_service.dart';
 import '../../../utility/data/models/calculation_history.dart';
+import '../../../utility/presentation/providers/history_provider.dart';
 
-class IndirimFiyatScreen extends StatefulWidget {
+class IndirimFiyatScreen extends ConsumerStatefulWidget {
   const IndirimFiyatScreen({super.key});
   @override
-  State<IndirimFiyatScreen> createState() => _IndirimFiyatScreenState();
+  ConsumerState<IndirimFiyatScreen> createState() => _IndirimFiyatScreenState();
 }
 
-class _IndirimFiyatScreenState extends State<IndirimFiyatScreen> {
+class _IndirimFiyatScreenState extends ConsumerState<IndirimFiyatScreen> {
   final _fiyatCtrl = TextEditingController();
   final _oranCtrl = TextEditingController();
   String? _resultText;
@@ -23,7 +24,7 @@ class _IndirimFiyatScreenState extends State<IndirimFiyatScreen> {
     if (fiyat == null || oran == null || fiyat <= 0 || oran < 0 || oran > 100) return;
     final indirim = fiyat * oran / 100;
     final sonFiyat = fiyat - indirim;
-    HistoryService.saveHistory(CalculationHistory(
+    ref.read(historyProvider.notifier).addHistory(CalculationHistory(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: 'İndirimli Fiyat: $fiyat ₺ - %$oran',
       result: 'Son: ${sonFiyat.toStringAsFixed(2)} ₺',

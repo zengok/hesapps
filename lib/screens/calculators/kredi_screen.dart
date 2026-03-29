@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../widgets/calculator_layout.dart';
 import '../../widgets/custom_input.dart';
+import '../../providers/usage_provider.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-class KrediScreen extends StatefulWidget {
-  const KrediScreen({Key? key}) : super(key: key);
+class KrediScreen extends ConsumerStatefulWidget {
+  const KrediScreen({super.key});
 
   @override
-  State<KrediScreen> createState() => _KrediScreenState();
+  ConsumerState<KrediScreen> createState() => _KrediScreenState();
 }
 
-class _KrediScreenState extends State<KrediScreen> {
+class _KrediScreenState extends ConsumerState<KrediScreen> {
   final TextEditingController _principalController = TextEditingController();
   final TextEditingController _rateController = TextEditingController();
   final TextEditingController _monthsController = TextEditingController();
@@ -37,6 +39,8 @@ class _KrediScreenState extends State<KrediScreen> {
       _resultText = "Taksit: ${pmt.toStringAsFixed(2)} ₺\nToplam: ${totalPaid.toStringAsFixed(2)} ₺";
       _showResult = true;
     });
+    // B3: kullanım kayıt—favorilere otomatik ekleme tetikler
+    ref.read(usageProvider.notifier).recordUsage('kreditaksit');
   }
 
   @override

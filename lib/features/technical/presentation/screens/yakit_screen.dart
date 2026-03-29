@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../widgets/calculator_layout.dart';
 import '../../../../widgets/custom_input.dart';
-import '../../../utility/data/services/history_service.dart';
 import '../../../utility/data/models/calculation_history.dart';
+import '../../../utility/presentation/providers/history_provider.dart';
 
-class YakitScreen extends StatefulWidget {
+class YakitScreen extends ConsumerStatefulWidget {
   const YakitScreen({super.key});
   @override
-  State<YakitScreen> createState() => _YakitScreenState();
+  ConsumerState<YakitScreen> createState() => _YakitScreenState();
 }
 
-class _YakitScreenState extends State<YakitScreen> {
+class _YakitScreenState extends ConsumerState<YakitScreen> {
   final _kmCtrl = TextEditingController();
   final _yakitCtrl = TextEditingController();
   final _fiyatCtrl = TextEditingController();
@@ -28,7 +29,7 @@ class _YakitScreenState extends State<YakitScreen> {
     double? maliyet;
     if (fiyat != null && fiyat > 0) maliyet = yakit * fiyat;
 
-    HistoryService.saveHistory(CalculationHistory(
+    ref.read(historyProvider.notifier).addHistory(CalculationHistory(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: 'Yakıt: $km km / $yakit L',
       result: '${tuketim100.toStringAsFixed(2)} L/100km',

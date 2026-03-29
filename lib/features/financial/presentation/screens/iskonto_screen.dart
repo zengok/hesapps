@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../widgets/calculator_layout.dart';
 import '../../../../widgets/custom_input.dart';
-import '../../../utility/data/services/history_service.dart';
 import '../../../utility/data/models/calculation_history.dart';
+import '../../../utility/presentation/providers/history_provider.dart';
 
-class IskontoScreen extends StatefulWidget {
+class IskontoScreen extends ConsumerStatefulWidget {
   const IskontoScreen({super.key});
   @override
-  State<IskontoScreen> createState() => _IskontoScreenState();
+  ConsumerState<IskontoScreen> createState() => _IskontoScreenState();
 }
 
-class _IskontoScreenState extends State<IskontoScreen> {
+class _IskontoScreenState extends ConsumerState<IskontoScreen> {
   final _fiyatCtrl = TextEditingController();
   final _oranCtrl = TextEditingController();
   String? _resultText;
@@ -25,7 +26,7 @@ class _IskontoScreenState extends State<IskontoScreen> {
     final indirilenTutar = fiyat * oran / 100;
     final sonFiyat = fiyat - indirilenTutar;
 
-    HistoryService.saveHistory(CalculationHistory(
+    ref.read(historyProvider.notifier).addHistory(CalculationHistory(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: 'İskonto: $fiyat ₺ - %$oran',
       result: 'Son Fiyat: ${sonFiyat.toStringAsFixed(2)} ₺',

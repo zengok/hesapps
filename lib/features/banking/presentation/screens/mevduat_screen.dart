@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../widgets/calculator_layout.dart';
 import '../../../../widgets/custom_input.dart';
-import '../../../utility/data/services/history_service.dart';
 import '../../../utility/data/models/calculation_history.dart';
+import '../../../utility/presentation/providers/history_provider.dart';
 
-class MevduatScreen extends StatefulWidget {
+class MevduatScreen extends ConsumerStatefulWidget {
   const MevduatScreen({super.key});
   @override
-  State<MevduatScreen> createState() => _MevduatScreenState();
+  ConsumerState<MevduatScreen> createState() => _MevduatScreenState();
 }
 
-class _MevduatScreenState extends State<MevduatScreen> {
+class _MevduatScreenState extends ConsumerState<MevduatScreen> {
   final _tutarCtrl = TextEditingController();
   final _faizCtrl = TextEditingController();
   final _gunCtrl = TextEditingController();
@@ -30,7 +31,7 @@ class _MevduatScreenState extends State<MevduatScreen> {
     final netGetiri = getiri - stopaj;
     final toplam = tutar + netGetiri;
 
-    HistoryService.saveHistory(CalculationHistory(
+    ref.read(historyProvider.notifier).addHistory(CalculationHistory(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: 'Mevduat: $tutar ₺ × $gun gün @ %$faiz',
       result: 'Net Getiri: ${netGetiri.toStringAsFixed(2)} ₺',

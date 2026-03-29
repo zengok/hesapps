@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../widgets/calculator_layout.dart';
 import '../../../../widgets/custom_input.dart';
-import '../../../utility/data/services/history_service.dart';
 import '../../../utility/data/models/calculation_history.dart';
+import '../../../utility/presentation/providers/history_provider.dart';
 
-class SicaklikScreen extends StatefulWidget {
+class SicaklikScreen extends ConsumerStatefulWidget {
   const SicaklikScreen({super.key});
   @override
-  State<SicaklikScreen> createState() => _SicaklikScreenState();
+  ConsumerState<SicaklikScreen> createState() => _SicaklikScreenState();
 }
 
-class _SicaklikScreenState extends State<SicaklikScreen> {
+class _SicaklikScreenState extends ConsumerState<SicaklikScreen> {
   final _degerCtrl = TextEditingController();
   String _from = 'Celsius';
   String _to = 'Fahrenheit';
@@ -42,7 +43,7 @@ class _SicaklikScreenState extends State<SicaklikScreen> {
     final celsius = _toCelsius(val, _from);
     final sonuc = _fromCelsius(celsius, _to);
 
-    HistoryService.saveHistory(CalculationHistory(
+    ref.read(historyProvider.notifier).addHistory(CalculationHistory(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: 'Sıcaklık: $val° $_from → $_to',
       result: '${sonuc.toStringAsFixed(2)}° $_to',
@@ -69,12 +70,12 @@ class _SicaklikScreenState extends State<SicaklikScreen> {
         CustomInput(controller: _degerCtrl, hintText: 'Sıcaklık Değeri', keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true), prefixIcon: LucideIcons.thermometer, onChanged: (_) => setState(() => _showResult = false)),
         const SizedBox(height: 16),
         Row(children: [
-          Expanded(child: Container(padding: const EdgeInsets.symmetric(horizontal: 12), decoration: BoxDecoration(color: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.3), borderRadius: BorderRadius.circular(16)),
+          Expanded(child: Container(padding: const EdgeInsets.symmetric(horizontal: 12), decoration: BoxDecoration(color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(16)),
             child: DropdownButtonHideUnderline(child: DropdownButton<String>(value: _from, dropdownColor: ddColor, isExpanded: true,
               items: _birimler.map((b) => DropdownMenuItem(value: b, child: Text(b, style: TextStyle(color: textColor)))).toList(),
               onChanged: (v) => setState(() { _from = v!; _showResult = false; }))))),
           const Padding(padding: EdgeInsets.symmetric(horizontal: 12), child: Icon(LucideIcons.arrowRight, color: Colors.orange)),
-          Expanded(child: Container(padding: const EdgeInsets.symmetric(horizontal: 12), decoration: BoxDecoration(color: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.3), borderRadius: BorderRadius.circular(16)),
+          Expanded(child: Container(padding: const EdgeInsets.symmetric(horizontal: 12), decoration: BoxDecoration(color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(16)),
             child: DropdownButtonHideUnderline(child: DropdownButton<String>(value: _to, dropdownColor: ddColor, isExpanded: true,
               items: _birimler.map((b) => DropdownMenuItem(value: b, child: Text(b, style: TextStyle(color: textColor)))).toList(),
               onChanged: (v) => setState(() { _to = v!; _showResult = false; }))))),

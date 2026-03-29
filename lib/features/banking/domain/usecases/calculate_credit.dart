@@ -15,13 +15,20 @@ class CalculateCreditUseCase {
     final hundred = Decimal.fromInt(100);
     // Effective Rate = Rate% * (1 + 0.15 + 0.15) = Rate% * 1.30
     final bsmvKkdfFactor = Decimal.parse('1.30');
-    final rateRational = monthlyRatePercent / hundred;
-    final r = (rateRational * bsmvKkdfFactor.toRational()).toDecimal(scaleOnInfinitePrecision: 10);
+    final r = Decimal.parse(
+      ((monthlyRatePercent / hundred) * bsmvKkdfFactor.toRational())
+        .toDecimal(scaleOnInfinitePrecision: 10)
+        .toString()
+    );
 
     if (r == Decimal.zero) {
-       final installment = principal / Decimal.fromInt(months);
+       final installment = Decimal.parse(
+         (principal / Decimal.fromInt(months))
+           .toDecimal(scaleOnInfinitePrecision: 2)
+           .toString()
+       );
        return CalculateCreditResult(
-         installment: installment.toDecimal(scaleOnInfinitePrecision: 2), 
+         installment: installment, 
          totalPaid: principal
        );
     }
@@ -36,7 +43,11 @@ class CalculateCreditUseCase {
     final numerator = principal * r * onePlusRPowN;
     final denominator = onePlusRPowN - Decimal.one;
     
-    final pmt = (numerator / denominator).toDecimal(scaleOnInfinitePrecision: 2);
+    final pmt = Decimal.parse(
+      (numerator / denominator)
+        .toDecimal(scaleOnInfinitePrecision: 2)
+        .toString()
+    );
     final totalPaid = pmt * Decimal.fromInt(months);
 
     return CalculateCreditResult(installment: pmt, totalPaid: totalPaid);

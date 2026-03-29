@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../widgets/calculator_layout.dart';
 import '../../widgets/custom_input.dart';
 import '../../core/theme.dart';
+import '../../providers/usage_provider.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-class KdvScreen extends StatefulWidget {
-  const KdvScreen({Key? key}) : super(key: key);
+class KdvScreen extends ConsumerStatefulWidget {
+  const KdvScreen({super.key});
 
   @override
-  State<KdvScreen> createState() => _KdvScreenState();
+  ConsumerState<KdvScreen> createState() => _KdvScreenState();
 }
 
-class _KdvScreenState extends State<KdvScreen> {
+class _KdvScreenState extends ConsumerState<KdvScreen> {
   final TextEditingController _amountController = TextEditingController();
   double _selectedRate = 20.0;
   bool _isKdvIncluded = false; // false = Hariç, true = Dahil
@@ -42,6 +44,8 @@ class _KdvScreenState extends State<KdvScreen> {
       _resultText = "Net: ${netAmount.toStringAsFixed(2)} ₺\nKDV: ${kdvAmount.toStringAsFixed(2)} ₺\nToplam: ${totalAmount.toStringAsFixed(2)} ₺";
       _showResult = true;
     });
+    // B3: kullanım kaydı
+    ref.read(usageProvider.notifier).recordUsage('kdv');
   }
 
   Widget _buildRateButton(double rate) {
@@ -61,13 +65,13 @@ class _KdvScreenState extends State<KdvScreen> {
           margin: const EdgeInsets.symmetric(horizontal: 4.0),
           padding: const EdgeInsets.symmetric(vertical: 14.0),
           decoration: BoxDecoration(
-            color: isSelected ? AppTheme.emerald.withOpacity(0.8) : (isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.3)),
+            color: isSelected ? AppTheme.emerald.withValues(alpha: 0.8) : (isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white.withValues(alpha: 0.3)),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: isSelected ? AppTheme.emerald : (isDark ? Colors.transparent : Colors.black.withOpacity(0.05)),
+              color: isSelected ? AppTheme.emerald : (isDark ? Colors.transparent : Colors.black.withValues(alpha: 0.05)),
             ),
             boxShadow: isSelected
-                ? [BoxShadow(color: AppTheme.emerald.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4))]
+                ? [BoxShadow(color: AppTheme.emerald.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 4))]
                 : [],
           ),
           child: Center(
@@ -121,7 +125,7 @@ class _KdvScreenState extends State<KdvScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.3),
+              color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
@@ -143,7 +147,7 @@ class _KdvScreenState extends State<KdvScreen> {
                     ),
                     Switch(
                       value: _isKdvIncluded,
-                      activeColor: AppTheme.emerald,
+                      activeThumbColor: AppTheme.emerald,
                       onChanged: (val) {
                         setState(() {
                           _isKdvIncluded = val;

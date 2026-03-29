@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../widgets/calculator_layout.dart';
 import '../../../../widgets/custom_input.dart';
-import '../../../utility/data/services/history_service.dart';
 import '../../../utility/data/models/calculation_history.dart';
+import '../../../utility/presentation/providers/history_provider.dart';
 
-class KrediKartiScreen extends StatefulWidget {
+class KrediKartiScreen extends ConsumerStatefulWidget {
   const KrediKartiScreen({super.key});
   @override
-  State<KrediKartiScreen> createState() => _KrediKartiScreenState();
+  ConsumerState<KrediKartiScreen> createState() => _KrediKartiScreenState();
 }
 
-class _KrediKartiScreenState extends State<KrediKartiScreen> {
+class _KrediKartiScreenState extends ConsumerState<KrediKartiScreen> {
   final _borcCtrl = TextEditingController();
   final _faizCtrl = TextEditingController();
   String? _resultText;
@@ -29,7 +30,7 @@ class _KrediKartiScreenState extends State<KrediKartiScreen> {
     // Bu ödemede anaparaya giden
     final anaparaOdeme = asgari - aylikFaiz;
 
-    HistoryService.saveHistory(CalculationHistory(
+    ref.read(historyProvider.notifier).addHistory(CalculationHistory(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: 'Kredi Kartı Asgari: $borc ₺',
       result: 'Asgari Ödeme: ${asgari.toStringAsFixed(2)} ₺',

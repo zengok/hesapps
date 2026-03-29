@@ -1,28 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../widgets/calculator_layout.dart';
 import '../../../../widgets/custom_input.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../theme/app_theme.dart';
 import '../../domain/usecases/calculate_bmi.dart';
-import '../../../utility/data/services/history_service.dart';
 import '../../../utility/data/models/calculation_history.dart';
+import '../../../utility/presentation/providers/history_provider.dart';
 
-class BmiScreen extends StatefulWidget {
+class BmiScreen extends ConsumerStatefulWidget {
   const BmiScreen({super.key});
 
   @override
-  State<BmiScreen> createState() => _BmiScreenState();
+  ConsumerState<BmiScreen> createState() => _BmiScreenState();
 }
 
-class _BmiScreenState extends State<BmiScreen> {
+class _BmiScreenState extends ConsumerState<BmiScreen> {
   final TextEditingController _heightController = TextEditingController();
   final TextEditingController _weightController = TextEditingController();
   
   String? _resultText;
-  String _bmiCategory = "";
-  Color _bmiColor = Colors.transparent;
-  double _bmiValue = 0;
   bool _showResult = false;
+  double _lastBmi = 0.0;
+
+  String _bmiYorumu(double bmi) {
+    if (bmi == 0.0) return '';
+    if (bmi < 18.5) return 'Zayıf — ideal aralığın altındasınız.';
+    if (bmi < 25.0) return 'Normal kiloda — sağlıklı aralıktasınız.';
+    if (bmi < 30.0) return 'Fazla kilolu — dikkat etmeniz önerilir.';
+    return 'Obezite sınırı aşılmış — bir uzmana danışın.';
+  }
 
   void _calculate() {
     FocusScope.of(context).unfocus();
@@ -41,17 +48,10 @@ class _BmiScreenState extends State<BmiScreen> {
       activityLevel: ActivityLevel.moderate,
     );
 
-    Color color;
-    switch(result.category) {
-      case BmiCategory.underweight: color = Colors.lightBlue; break;
-      case BmiCategory.normal: color = AppTheme.emerald; break;
-      case BmiCategory.overweight: color = AppTheme.amber; break;
-      case BmiCategory.obese: color = AppTheme.rose; break;
-    }
 
     final resultStr = "${result.bmi.toStringAsFixed(1)}\n(${result.categoryText})";
 
-    HistoryService.saveHistory(CalculationHistory(
+    ref.read(historyProvider.notifier).addHistory(CalculationHistory(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: "BMI: $weight kg, $height cm",
       result: resultStr.replaceAll('\n', ' '),
@@ -59,10 +59,8 @@ class _BmiScreenState extends State<BmiScreen> {
     ));
 
     setState(() {
-      _bmiValue = result.bmi;
       _resultText = resultStr;
-      _bmiCategory = result.categoryText;
-      _bmiColor = color;
+      _lastBmi = result.bmi;
       _showResult = true;
     });
   }
@@ -117,6 +115,16 @@ class _BmiScreenState extends State<BmiScreen> {
                       colors: [Colors.lightBlue, AppTheme.emerald, AppTheme.amber, AppTheme.rose],
                     ),
                     border: Border.all(color: Colors.white24),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Center(
+                  child: Text(
+                    _bmiYorumu(_lastBmi),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                    ),
+                    textAlign: TextAlign.center,
                   ),
                 ),
                 const SizedBox(height: 16),

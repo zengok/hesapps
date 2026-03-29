@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../widgets/calculator_layout.dart';
 import '../../../../widgets/custom_input.dart';
-import '../../../utility/data/services/history_service.dart';
 import '../../../utility/data/models/calculation_history.dart';
+import '../../../utility/presentation/providers/history_provider.dart';
 
-class GnoScreen extends StatefulWidget {
+class GnoScreen extends ConsumerStatefulWidget {
   const GnoScreen({super.key});
   @override
-  State<GnoScreen> createState() => _GnoScreenState();
+  ConsumerState<GnoScreen> createState() => _GnoScreenState();
 }
 
-class _GnoScreenState extends State<GnoScreen> {
+class _GnoScreenState extends ConsumerState<GnoScreen> {
   final List<Map<String, TextEditingController>> _dersler = [
     {'not': TextEditingController(), 'kredi': TextEditingController()},
   ];
@@ -34,7 +35,7 @@ class _GnoScreenState extends State<GnoScreen> {
     }
     if (toplamKredi == 0) return;
     final gno = toplamKrediXNot / toplamKredi;
-    HistoryService.saveHistory(CalculationHistory(
+    ref.read(historyProvider.notifier).addHistory(CalculationHistory(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: 'GNO Hesaplama (${_dersler.length} ders)',
       result: 'GNO: ${gno.toStringAsFixed(2)}',

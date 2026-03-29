@@ -272,7 +272,7 @@ class _GlassKeyState extends State<_GlassKey>
 
     final textColor = isC
         ? AppTheme.rose         // Clear → kırmızı vurgu
-        : (isDark ? Colors.white : const Color(0xFF0F172A));
+        : Theme.of(context).colorScheme.onSurface;
 
     return Semantics(
       button: true,
@@ -439,7 +439,7 @@ class _DoneButtonState extends State<_DoneButton>
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 2.0,
-                      color: widget.isDark ? Colors.white : const Color(0xFF0F172A),
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                 ),
@@ -464,7 +464,7 @@ Future<void> showGlassNumericPad({
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    barrierColor: Colors.black.withAlpha(120),
+    barrierColor: Colors.black.withValues(alpha: 120 / 255),
     builder: (ctx) => GlassNumericPad(
       onKeyPress: (char) {
         // Nokta tekrar girişini engelle

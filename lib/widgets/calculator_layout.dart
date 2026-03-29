@@ -47,7 +47,12 @@ class _CalculatorLayoutState extends State<CalculatorLayout> {
         
         // Memori tabanli XFile olusturma: Cross-platform web/windows/android uyumludur ve dart:io gerektirmez.
         final xfile = XFile.fromData(pngBytes, mimeType: 'image/png', name: 'hesapps_sonuc.png');
-        await Share.shareXFiles([xfile], text: '${widget.title} - HesApps Infografik');
+        await SharePlus.instance.share(
+          ShareParams(
+            text: '${widget.title} - HesApps Infografik',
+            files: [xfile],
+          ),
+        );
       }
     } catch (e) {
       debugPrint('Share Error: $e');
@@ -170,8 +175,7 @@ class _CalculatorLayoutState extends State<CalculatorLayout> {
                                               ),
                                               textAlign: TextAlign.center,
                                             ).animate()
-                                             .fadeIn(duration: 600.ms)
-                                             .shimmer(duration: 1500.ms, color: Colors.white38),
+                                             .fadeIn(duration: const Duration(milliseconds: 120)),
                                           const SizedBox(height: 24),
                                           Semantics(
                                             button: true,
@@ -181,7 +185,7 @@ class _CalculatorLayoutState extends State<CalculatorLayout> {
                                               child: Container(
                                                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                                                 decoration: BoxDecoration(
-                                                  color: AppTheme.emerald.withOpacity(0.1),
+                                                  color: AppTheme.emerald.withValues(alpha: 0.1),
                                                   borderRadius: BorderRadius.circular(16),
                                                 ),
                                                 child: const Row(
