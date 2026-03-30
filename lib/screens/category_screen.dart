@@ -84,37 +84,8 @@ class CategoryScreen extends StatelessWidget {
                     itemCount: tools.length,
                     itemBuilder: (context, index) {
                       final tool = tools[index];
-                      const routeMap = {
-                        'kdv': '/kdv',
-                        'maasvergi': '/maasvergi',
-                        'iskonto': '/iskonto',
-                        'karmarji': '/karmarji',
-                        'enflasyon': '/enflasyon',
-                        'kreditaksit': '/kredi',
-                        'mevduatgetirisi': '/mevduat',
-                        'kredikartiasgari': '/kredikartiasgari',
-                        'doviz': '/doviz',
-                        'bmi': '/bmi',
-                        'idealkilo': '/idealkilo',
-                        'bmr': '/bmr',
-                        'sutuketimi': '/sutuketimi',
-                        'hamilelik': '/hamilelik',
-                        'birim': '/birim',
-                        'sicaklik': '/sicaklik',
-                        'yakit': '/yakit',
-                        'internet': '/internet',
-                        'lgsyks': '/lgsyks',
-                        'gno': '/gno',
-                        'yas': '/yas',
-                        'bahsis': '/bahsis',
-                        'indirimlifiyat': '/indirimlifiyat',
-                        'tarihfarki': '/tarihfarki',
-                      };
                       return GestureDetector(
-                        onTap: () {
-                          final route = routeMap[tool.id];
-                          if (route != null) context.push(route);
-                        },
+                        onTap: () => context.push(tool.route),
                         child: GlassCard(
                           borderRadius: 20,
                           child: Padding(

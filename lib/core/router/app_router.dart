@@ -46,6 +46,15 @@ import '../../features/education/presentation/screens/yas_screen.dart';
 import '../../features/daily/presentation/screens/bahsis_screen.dart';
 import '../../features/daily/presentation/screens/indirim_fiyat_screen.dart';
 import '../../features/daily/presentation/screens/tarih_farki_screen.dart';
+import '../../features/daily/presentation/screens/desi_screen.dart';
+import '../../features/daily/presentation/screens/yuzde_screen.dart';
+
+// Yeni finansal
+import '../../features/financial/presentation/screens/faiz_screen.dart';
+import '../../features/financial/presentation/screens/kidem_tazminati_screen.dart';
+
+// Yeni eğitim
+import '../../features/education/presentation/screens/kpss_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -99,10 +108,19 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/gno', parentNavigatorKey: rootNavigatorKey, builder: (_, __) => const GnoScreen()),
       GoRoute(path: '/yas', parentNavigatorKey: rootNavigatorKey, builder: (_, __) => const YasHesaplamaScreen()),
 
+      // --- FİNANSAL (yeni) ---
+      GoRoute(path: '/faiz', parentNavigatorKey: rootNavigatorKey, builder: (_, __) => const FaizScreen()),
+      GoRoute(path: '/kidemtazminati', parentNavigatorKey: rootNavigatorKey, builder: (_, __) => const KidemTazminatiScreen()),
+
+      // --- EĞİTİM (yeni) ---
+      GoRoute(path: '/kpss', parentNavigatorKey: rootNavigatorKey, builder: (_, __) => const KpssScreen()),
+
       // --- GÜNLÜK ---
       GoRoute(path: '/bahsis', parentNavigatorKey: rootNavigatorKey, builder: (_, __) => const BahsisScreen()),
       GoRoute(path: '/indirimlifiyat', parentNavigatorKey: rootNavigatorKey, builder: (_, __) => const IndirimFiyatScreen()),
       GoRoute(path: '/tarihfarki', parentNavigatorKey: rootNavigatorKey, builder: (_, __) => const TarihFarkiScreen()),
+      GoRoute(path: '/desi', parentNavigatorKey: rootNavigatorKey, builder: (_, __) => const DesiScreen()),
+      GoRoute(path: '/yuzde', parentNavigatorKey: rootNavigatorKey, builder: (_, __) => const YuzdeScreen()),
       GoRoute(path: '/about', parentNavigatorKey: rootNavigatorKey, builder: (context, state) => const AboutScreen()),
     ],
   );

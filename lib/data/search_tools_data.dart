@@ -34,10 +34,20 @@ const List<SearchTool> allTools = [
   SearchTool(id: 'gno', name: 'GNO/Not Ortalaması', keywords: ['gno', 'ortalama', 'not', 'eğitim', 'okul', 'ders'], route: '/gno', icon: 'calculator', usageRank: 21),
   SearchTool(id: 'yas', name: 'Yaş Hesaplama', keywords: ['yaş', 'doğum tarihi', 'gün', 'ay', 'yıl', 'hesapla'], route: '/yas', icon: 'calculator', usageRank: 22),
 
+  SearchTool(id: 'faiz', name: 'Faiz Hesaplama', keywords: ['faiz', 'basit faiz', 'bileşik faiz', 'interest', 'ana para', 'getiri', 'yatırım', 'oran'], route: '/faiz', icon: 'calculator', usageRank: 6),
+  SearchTool(id: 'kidemtazminati', name: 'Kıdem Tazminatı Hesaplama', keywords: ['kıdem', 'tazminat', 'işten çıkma', 'hizmet', 'çalışma yılı', 'işçi', 'kıdem tazminat'], route: '/kidemtazminati', icon: 'wallet', usageRank: 5),
+
+  // EĞİTİM (ek)
+  SearchTool(id: 'kpss', name: 'KPSS Puan Hesaplama', keywords: ['kpss', 'puan', 'sınav', 'memur', 'genel yetenek', 'genel kültür', 'eğitim bilimleri', 'öğretmen', 'p1', 'p10'], route: '/kpss', icon: 'calculator', usageRank: 21),
+
   // GÜNLÜK
   SearchTool(id: 'bahsis', name: 'Bahşiş Hesaplama', keywords: ['bahşiş', 'hesap', 'restoran', 'ödeme', 'yüzde'], route: '/bahsis', icon: 'calculator', usageRank: 23),
   SearchTool(id: 'indirimfiyat', name: 'İndirim & Fiyat Hesaplama', keywords: ['indirim', 'fiyat', 'hesap', 'yüzde', 'alışveriş', 'kampanya'], route: '/indirimlifiyat', icon: 'calculator', usageRank: 24),
   SearchTool(id: 'tarihfarki', name: 'Tarih Farkı Hesaplama', keywords: ['tarih', 'fark', 'gün', 'ay', 'yıl', 'zaman', 'süre'], route: '/tarihfarki', icon: 'calculator', usageRank: 25),
+  SearchTool(id: 'yuzde', name: 'Yüzde Hesaplama', keywords: ['yüzde', 'oran', 'percent', '%', 'hesap', 'artış', 'azalma', 'fark', 'kaçta kaç'], route: '/yuzde', icon: 'calculator', usageRank: 3),
+
+  // KARGO & TİCARET
+  SearchTool(id: 'desi', name: 'Desi Hesaplama', keywords: ['desi', 'kargo', 'hacim', 'ağırlık', 'taşıma', 'koli', 'boyut', 'en boy yükseklik', 'kargostat'], route: '/desi', icon: 'package', usageRank: 20),
 ];
 
 IconData toolIcon(String iconName) {
@@ -47,6 +57,7 @@ IconData toolIcon(String iconName) {
     case 'receipt':      return LucideIcons.coins;
     case 'arrow_left_right': return LucideIcons.arrowLeftRight;
     case 'activity':     return LucideIcons.activity;
+    case 'package':      return LucideIcons.package;
     default:             return LucideIcons.calculator;
   }
 }
